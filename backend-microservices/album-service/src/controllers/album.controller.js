@@ -31,7 +31,7 @@ export const getAlbum = async (req, res) => {
 
 export const createNewAlbum = async (req, res) => {
   try {
-    const album = await createAlbum(req.body, req.user);
+    const album = await createAlbum(req.body, req.file, req.user);
     res.status(201).json(album);
   } catch (error) {
     res.status(400).json({ error: error.message });

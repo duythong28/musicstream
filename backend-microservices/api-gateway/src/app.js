@@ -10,14 +10,40 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+
+app.use((req, res, next) => {
+  let service = "Unknown";
+  if (
+    req.path.startsWith("/api/auth") ||
+    req.path.startsWith("/api/users") ||
+    req.path.startsWith("/api/admin/users")
+  ) {
+    service = "User Service";
+  } else if (
+    req.path.startsWith("/api/songs") ||
+    req.path.startsWith("/api/admin/songs")
+  ) {
+    service = "Song Service";
+  } else if (
+    req.path.startsWith("/api/albums") ||
+    req.path.startsWith("/api/admin/albums")
+  ) {
+    service = "Album Service";
+  }
+  console.log(
+    `[${new Date().toISOString()}] ${req.method} ${
+      req.originalUrl
+    } -> ${service}`
+  );
+  next();
+});
 
 // Health check
 app.get("/health", (req, res) => {
-  res.json({ 
-    status: "OK", 
+  res.json({
+    status: "OK",
     service: "api-gateway",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -43,7 +69,7 @@ app.get("/health/services", async (req, res) => {
 
   res.json({
     gateway: "healthy",
-    services: healthChecks.map(result => result.value),
+    services: healthChecks.map((result) => result.value),
   });
 });
 
@@ -57,14 +83,17 @@ const proxyOptions = (target) => ({
       proxyReq.setHeader("authorization", req.headers.authorization);
     }
     if (req.headers["x-clerk-session-id"]) {
-      proxyReq.setHeader("x-clerk-session-id", req.headers["x-clerk-session-id"]);
+      proxyReq.setHeader(
+        "x-clerk-session-id",
+        req.headers["x-clerk-session-id"]
+      );
     }
   },
   onError: (err, req, res) => {
     console.error("Proxy error:", err);
-    res.status(503).json({ 
+    res.status(503).json({
       error: "Service unavailable",
-      message: "The requested service is currently unavailable"
+      message: "The requested service is currently unavailable",
     });
   },
 });
@@ -142,7 +171,13 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
-  console.log(`User Service: ${process.env.USER_SERVICE_URL || "http://localhost:3001"}`);
-  console.log(`Song Service: ${process.env.SONG_SERVICE_URL || "http://localhost:3002"}`);
-  console.log(`Album Service: ${process.env.ALBUM_SERVICE_URL || "http://localhost:3003"}`);
+  console.log(
+    `User Service: ${process.env.USER_SERVICE_URL || "http://localhost:3001"}`
+  );
+  console.log(
+    `Song Service: ${process.env.SONG_SERVICE_URL || "http://localhost:3002"}`
+  );
+  console.log(
+    `Album Service: ${process.env.ALBUM_SERVICE_URL || "http://localhost:3003"}`
+  );
 });

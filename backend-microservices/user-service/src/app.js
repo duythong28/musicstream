@@ -6,15 +6,25 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import adminRoutes from "./routes/admin.route.js";
+import { clerkMiddleware } from "@clerk/express";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(clerkMiddleware());
+
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    console.error("Bad JSON:", err.message);
+    return res.status(400).json({ error: "Invalid JSON payload" });
+  }
+  next(err);
+});
 
 // Health check
 app.get("/health", (req, res) => {

@@ -1,9 +1,12 @@
 // song-service/src/services/song.service.js
+import { uploadToCloudinary } from "../config/cloudinary.config.js";
 import { Song } from "../models/song.model.js";
 
 export const getAllSongs = async () => {
   // Only return public and visible songs
-  const songs = await Song.find({ isPublic: true, isVisible: true }).sort({ createdAt: -1 });
+  const songs = await Song.find({ isPublic: true, isVisible: true }).sort({
+    createdAt: -1,
+  });
   return songs;
 };
 
@@ -20,25 +23,45 @@ export const getSongsByIds = async (songIds) => {
   return songs;
 };
 
-export const createSong = async (songData, user) => {
+export const createSong = async (body, files, user) => {
   if (user.role !== "artist" && user.role !== "admin") {
     throw new Error("Only artists can upload songs");
   }
+  if (!files || !files.image || !files.audio) {
+    throw new Error("Both an image and an audio file are required.");
+  }
 
-  const song = await Song.create({
-    ...songData,
+  const [imageUploadResult, audioUploadResult] = await Promise.all([
+    uploadToCloudinary(files.image[0].buffer, { resource_type: "image" }),
+    uploadToCloudinary(files.audio[0].buffer, { resource_type: "video" }),
+  ]);
+
+  if (!imageUploadResult?.secure_url || !audioUploadResult?.secure_url) {
+    throw new Error("Cloudinary upload failed.");
+  }
+
+  const duration = Math.round(audioUploadResult.duration);
+  const { title, albumId } = body;
+
+  const newSong = new Song({
+    title,
+    albumId: albumId || null,
     artistId: user._id.toString(),
     artistName: user.fullName,
+    imageUrl: imageUploadResult.secure_url,
+    audioUrl: audioUploadResult.secure_url,
+    duration: duration,
     isPublic: true,
     isVisible: true,
   });
 
-  return song;
+  await newSong.save();
+  return newSong;
 };
 
 export const updateSong = async (songId, songData, user) => {
   const song = await Song.findById(songId);
-  
+
   if (!song) {
     throw new Error("Song not found");
   }
@@ -55,7 +78,7 @@ export const updateSong = async (songId, songData, user) => {
 
 export const deleteSong = async (songId, user) => {
   const song = await Song.findById(songId);
-  
+
   if (!song) {
     throw new Error("Song not found");
   }
@@ -71,7 +94,7 @@ export const deleteSong = async (songId, user) => {
 
 export const toggleSongVisibility = async (songId, user) => {
   const song = await Song.findById(songId);
-  
+
   if (!song) {
     throw new Error("Song not found");
   }
@@ -99,7 +122,7 @@ export const adminGetAllSongs = async () => {
 
 export const adminToggleVisible = async (songId) => {
   const song = await Song.findById(songId);
-  
+
   if (!song) {
     throw new Error("Song not found");
   }

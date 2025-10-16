@@ -40,7 +40,7 @@ export const getBatchSongs = async (req, res) => {
 
 export const uploadSong = async (req, res) => {
   try {
-    const song = await createSong(req.body, req.user);
+    const song = await createSong(req.body, req.files, req.user);
     res.status(201).json(song);
   } catch (error) {
     res.status(400).json({ error: error.message });

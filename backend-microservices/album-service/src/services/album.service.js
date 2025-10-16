@@ -1,3 +1,4 @@
+import { uploadToCloudinary } from "../config/cloudinary.config.js";
 import { Album } from "../models/album.model.js";
 import { callService } from "./httpClient.js";
 
@@ -45,16 +46,30 @@ export const getAlbumById = async (albumId, userId = null) => {
   };
 };
 
-export const createAlbum = async (albumData, user) => {
+export const createAlbum = async (body, file, user) => {
   if (user.isBlocked) {
     throw new Error("User is blocked");
+  }
+  if (!file) {
+    throw new Error("A cover image is required to create an album.");
+  }
+  if (!body.title) {
+    throw new Error("A title is required to create an album.");
+  }
+
+  const imageUploadResult = await uploadToCloudinary(file.buffer, {
+    resource_type: "image",
+  });
+
+  if (!imageUploadResult?.secure_url) {
+    throw new Error("Image upload to Cloudinary failed.");
   }
 
   // Determine isPublic based on user role
   const isPublic = user.role === "artist" ? albumData.isPublic : false;
-
   const album = await Album.create({
-    ...albumData,
+    title: body.title,
+    imageUrl: imageUploadResult.secure_url,
     creatorId: user._id.toString(),
     creatorName: user.fullName,
     isPublic,

@@ -1,23 +1,19 @@
 // user-service/src/middleware/auth.middleware.js
-import { clerkClient } from "@clerk/clerk-sdk-node";
+import { getAuth } from "@clerk/express";
 
 export const requireAuth = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    
-    if (!token) {
+    const { isAuthenticated, userId } = getAuth(req);
+
+    if (!isAuthenticated) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const session = await clerkClient.sessions.verifySession(
-      req.headers["x-clerk-session-id"],
-      token
-    );
-
-    req.auth = { userId: session.userId };
+    req.auth = { userId: userId };
     next();
   } catch (error) {
+    console.error("Auth error:", error);
+
     res.status(401).json({ error: "Invalid token" });
   }
 };
-

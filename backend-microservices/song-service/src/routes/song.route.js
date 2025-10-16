@@ -12,6 +12,7 @@ import {
 } from "../controllers/song.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 import { requireArtist } from "../middleware/role.middleware.js";
+import { uploadSongFiles } from "../middleware/upload.middleware.js";
 
 const router = Router();
 
@@ -21,7 +22,7 @@ router.get("/:id", getSong);
 router.post("/batch", getBatchSongs);
 
 // Artist routes
-router.post("/", requireAuth, requireArtist, uploadSong);
+router.post("/", requireAuth, requireArtist, uploadSongFiles, uploadSong);
 router.patch("/:id", requireAuth, requireArtist, editSong);
 router.delete("/:id", requireAuth, requireArtist, removeSong);
 router.patch("/:id/visibility", requireAuth, requireArtist, toggleVisibility);

@@ -1,14 +1,14 @@
-import { clerkClient } from "@clerk/clerk-sdk-node";
+import { getAuth } from "@clerk/express";
 
 export const optionalAuth = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    const sessionId = req.headers["x-clerk-session-id"];
+    const { isAuthenticated, userId } = getAuth(req);
 
-    if (token && sessionId) {
-      const session = await clerkClient.sessions.verifySession(sessionId, token);
-      req.auth = { userId: session.userId };
+    if (!isAuthenticated) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
+
+    req.auth = { userId: userId };
 
     next();
   } catch (error) {
@@ -19,15 +19,13 @@ export const optionalAuth = async (req, res, next) => {
 
 export const requireAuth = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    const sessionId = req.headers["x-clerk-session-id"];
+    const { isAuthenticated, userId } = getAuth(req);
 
-    if (!token || !sessionId) {
+    if (!isAuthenticated) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const session = await clerkClient.sessions.verifySession(sessionId, token);
-    req.auth = { userId: session.userId };
+    req.auth = { userId: userId };
     next();
   } catch (error) {
     res.status(401).json({ error: "Invalid token" });

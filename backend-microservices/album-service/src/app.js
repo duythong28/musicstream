@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 import albumRoutes from "./routes/album.route.js";
 import adminRoutes from "./routes/admin.route.js";
+import { clerkMiddleware } from "@clerk/express";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 3003;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(clerkMiddleware());
 
 // Health check
 app.get("/health", (req, res) => {
