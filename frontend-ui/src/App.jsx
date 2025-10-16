@@ -60,19 +60,19 @@ const AuthSync = ({ children }) => {
 
           setUser(existingUser);
         } catch (error) {
-          Register new user
-            try {
-              const newUser = await registerUser({
-                clerkId: clerkUser.id,
-                fullName: clerkUser.fullName || "User",
-                email: clerkUser.primaryEmailAddress?.emailAddress || "",
-                imageUrl: clerkUser.imageUrl,
-                role: "user", // Default role
-              });
-              setUser(newUser);
-            } catch (regError) {
-              console.error("Failed to register user:", regError);
-            }
+          // Register new user
+          try {
+            const newUser = await registerUser({
+              clerkId: clerkUser.id,
+              fullName: clerkUser.fullName || "User",
+              email: clerkUser.primaryEmailAddress?.emailAddress || "",
+              imageUrl: clerkUser.imageUrl,
+              role: "user", // Default role
+            });
+            setUser(newUser);
+          } catch (regError) {
+            console.error("Failed to register user:", regError);
+          }
         }
       }
     };

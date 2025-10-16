@@ -13,12 +13,19 @@ export const albumService = {
   },
 
   createAlbum: async (data) => {
-    const response = await api.post(API_ENDPOINTS.ALBUMS, data);
+    const response = await api.post(API_ENDPOINTS.ALBUMS, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   },
 
   updateAlbum: async (albumId, data) => {
-    const response = await api.patch(`${API_ENDPOINTS.ALBUMS}/${albumId}`, data);
+    const response = await api.patch(
+      `${API_ENDPOINTS.ALBUMS}/${albumId}`,
+      data
+    );
     return response.data;
   },
 
@@ -28,17 +35,24 @@ export const albumService = {
   },
 
   addSongToAlbum: async (albumId, songId) => {
-    const response = await api.post(`${API_ENDPOINTS.ALBUMS}/${albumId}/songs`, { songId });
+    const response = await api.post(
+      `${API_ENDPOINTS.ALBUMS}/${albumId}/songs`,
+      { songId }
+    );
     return response.data;
   },
 
   removeSongFromAlbum: async (albumId, songId) => {
-    const response = await api.delete(`${API_ENDPOINTS.ALBUMS}/${albumId}/songs/${songId}`);
+    const response = await api.delete(
+      `${API_ENDPOINTS.ALBUMS}/${albumId}/songs/${songId}`
+    );
     return response.data;
   },
 
   toggleVisibility: async (albumId) => {
-    const response = await api.patch(`${API_ENDPOINTS.ALBUMS}/${albumId}/visibility`);
+    const response = await api.patch(
+      `${API_ENDPOINTS.ALBUMS}/${albumId}/visibility`
+    );
     return response.data;
   },
 

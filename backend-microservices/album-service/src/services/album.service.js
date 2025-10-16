@@ -66,7 +66,7 @@ export const createAlbum = async (body, file, user) => {
   }
 
   // Determine isPublic based on user role
-  const isPublic = user.role === "artist" ? albumData.isPublic : false;
+  const isPublic = user.role === "artist" ? body.isPublic : false;
   const album = await Album.create({
     title: body.title,
     imageUrl: imageUploadResult.secure_url,
