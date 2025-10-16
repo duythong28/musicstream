@@ -1,4 +1,3 @@
-
 import { SignUp } from "@clerk/clerk-react";
 import { Music } from "lucide-react";
 
@@ -17,7 +16,7 @@ const SignUpPage = () => {
           appearance={{
             elements: {
               rootBox: "w-full",
-              card: "bg-dark-secondary shadow-2xl",
+              card: "bg-light-secondary shadow-2xl",
             },
           }}
           routing="path"

@@ -2,16 +2,21 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { albumService } from "../services/albumService";
 import { usePlayerStore } from "../store/usePlayerStore";
-import { Play, Clock, ArrowLeft } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Play, Clock, ArrowLeft, Trash2 } from "lucide-react";
 import { formatTime } from "../utils/formatTime";
 import Button from "../components/common/Button";
+import toast from "react-hot-toast";
 
 const AlbumDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [album, setAlbum] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { setQueue } = usePlayerStore();
+
+  const isOwner = album?.creatorId === user?._id.toString();
 
   useEffect(() => {
     fetchAlbum();
@@ -23,6 +28,7 @@ const AlbumDetailPage = () => {
       setAlbum(data);
     } catch (error) {
       console.error("Error fetching album:", error);
+      toast.error("Failed to load album");
     } finally {
       setIsLoading(false);
     }
@@ -31,6 +37,22 @@ const AlbumDetailPage = () => {
   const handlePlayAll = () => {
     if (album?.songs && album.songs.length > 0) {
       setQueue(album.songs, 0);
+    }
+  };
+
+  const handleRemoveSong = async (songId) => {
+    if (!confirm("Remove this song from the playlist?")) return;
+
+    try {
+      await albumService.removeSongFromAlbum(id, songId);
+      setAlbum({
+        ...album,
+        songs: album.songs.filter((s) => s._id !== songId),
+        songIds: album.songIds.filter((sid) => sid !== songId),
+      });
+      toast.success("Song removed");
+    } catch (error) {
+      toast.error("Failed to remove song");
     }
   };
 
@@ -98,12 +120,23 @@ const AlbumDetailPage = () => {
         <table className="w-full">
           <thead className="border-b border-dark-tertiary">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-400 w-12">#</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Title</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Artist</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-400 w-12">
+                #
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">
+                Title
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">
+                Artist
+              </th>
               <th className="px-4 py-3 text-right text-sm font-medium text-gray-400">
                 <Clock size={16} className="inline" />
               </th>
+              {isOwner && (
+                <th className="px-4 py-3 text-right text-sm font-medium text-gray-400">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -115,8 +148,13 @@ const AlbumDetailPage = () => {
                   onClick={() => setQueue(album.songs, index)}
                 >
                   <td className="px-4 py-3">
-                    <span className="text-gray-400 group-hover:hidden">{index + 1}</span>
-                    <Play size={16} className="text-primary hidden group-hover:block" />
+                    <span className="text-gray-400 group-hover:hidden">
+                      {index + 1}
+                    </span>
+                    <Play
+                      size={16}
+                      className="text-primary hidden group-hover:block"
+                    />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center space-x-3">
@@ -132,6 +170,19 @@ const AlbumDetailPage = () => {
                   <td className="px-4 py-3 text-right text-gray-400">
                     {formatTime(song.duration)}
                   </td>
+                  {isOwner && (
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveSong(song._id);
+                        }}
+                        className="p-2 text-red-500 hover:bg-dark-tertiary rounded-lg transition"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (
