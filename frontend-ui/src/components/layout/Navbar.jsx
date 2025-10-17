@@ -30,10 +30,7 @@ const Navbar = () => {
         {/* Search Bar */}
         <div className="flex-1 max-w-xl mx-8">
           <form onSubmit={handleSearch} className="relative">
-            <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={20}
-            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
               value={searchQuery}
@@ -48,6 +45,13 @@ const Navbar = () => {
         <div className="flex items-center space-x-4">
           {user && (
             <>
+              <Link
+                to="/profile"
+                className="text-gray-400 hover:text-white transition"
+              >
+                Profile
+              </Link>
+              
               {user.role === USER_ROLES.ARTIST && (
                 <Link
                   to="/artist"
@@ -66,9 +70,9 @@ const Navbar = () => {
               )}
             </>
           )}
-
+          
           {clerkUser ? (
-            <UserButton afterSignOutUrl="/" />
+            <UserButton afterSignOutUrl="/sign-in" />
           ) : (
             <Link
               to="/sign-in"

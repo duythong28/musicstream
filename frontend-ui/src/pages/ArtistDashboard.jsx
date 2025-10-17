@@ -3,6 +3,8 @@ import { songService } from "../services/songService";
 import { albumService } from "../services/albumService";
 import UploadSongModal from "../components/songs/UploadSongModal";
 import CreateAlbumModal from "../components/albums/CreateAlbumModal";
+import EditSongModal from "../components/songs/EditSongModal";
+import EditAlbumModal from "../components/albums/EditAlbumModal";
 import Button from "../components/common/Button";
 import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
@@ -14,6 +16,10 @@ const ArtistDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showCreateAlbumModal, setShowCreateAlbumModal] = useState(false);
+  const [showEditSongModal, setShowEditSongModal] = useState(false);
+  const [showEditAlbumModal, setShowEditAlbumModal] = useState(false);
+  const [selectedSong, setSelectedSong] = useState(null);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [activeTab, setActiveTab] = useState("songs"); // songs or albums
 
   useEffect(() => {
@@ -41,6 +47,24 @@ const ArtistDashboard = () => {
 
   const handleAlbumCreated = (newAlbum) => {
     setAlbums([newAlbum, ...albums]);
+  };
+
+  const handleSongUpdated = (updatedSong) => {
+    setSongs(songs.map((s) => (s._id === updatedSong._id ? updatedSong : s)));
+  };
+
+  const handleAlbumUpdated = (updatedAlbum) => {
+    setAlbums(albums.map((a) => (a._id === updatedAlbum._id ? updatedAlbum : a)));
+  };
+
+  const handleEditSong = (song) => {
+    setSelectedSong(song);
+    setShowEditSongModal(true);
+  };
+
+  const handleEditAlbum = (album) => {
+    setSelectedAlbum(album);
+    setShowEditAlbumModal(true);
   };
 
   const handleDeleteSong = async (songId) => {
@@ -200,6 +224,13 @@ const ArtistDashboard = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <button
+                            onClick={() => handleEditSong(song)}
+                            className="p-2 text-blue-500 hover:bg-dark-hover rounded-lg transition"
+                            title="Edit"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
                             onClick={() => handleToggleSongVisibility(song._id)}
                             className="p-2 text-gray-400 hover:text-white hover:bg-dark-hover rounded-lg transition"
                             title={song.isPublic ? "Make Private" : "Make Public"}
@@ -281,6 +312,13 @@ const ArtistDashboard = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <button
+                            onClick={() => handleEditAlbum(album)}
+                            className="p-2 text-blue-500 hover:bg-dark-hover rounded-lg transition"
+                            title="Edit"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
                             onClick={() => handleToggleAlbumVisibility(album._id)}
                             className="p-2 text-gray-400 hover:text-white hover:bg-dark-hover rounded-lg transition"
                             title={album.isPublic ? "Make Private" : "Make Public"}
@@ -321,6 +359,18 @@ const ArtistDashboard = () => {
         isOpen={showCreateAlbumModal}
         onClose={() => setShowCreateAlbumModal(false)}
         onSuccess={handleAlbumCreated}
+      />
+      <EditSongModal
+        isOpen={showEditSongModal}
+        onClose={() => setShowEditSongModal(false)}
+        song={selectedSong}
+        onSuccess={handleSongUpdated}
+      />
+      <EditAlbumModal
+        isOpen={showEditAlbumModal}
+        onClose={() => setShowEditAlbumModal(false)}
+        album={selectedAlbum}
+        onSuccess={handleAlbumUpdated}
       />
     </div>
   );

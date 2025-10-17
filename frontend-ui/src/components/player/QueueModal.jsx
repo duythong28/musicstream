@@ -49,7 +49,7 @@ const QueueModal = ({ isOpen, onClose }) => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-400">
-              Next in Queue ({queue.length - currentIndex - 1})
+              Next in Queue ({Math.max(0, queue.length - currentIndex - 1)})
             </h3>
             {queue.length > 0 && (
               <button
@@ -95,18 +95,18 @@ const QueueModal = ({ isOpen, onClose }) => {
                     </span>
                     <button
                       onClick={() => handleRemoveFromQueue(index)}
-                      className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition text-red-500 hover:text-red-400"
+                      className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition"
                     >
-                      <X size={16} />
+                      <X size={16} className="text-red-500" />
                     </button>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm p-4 text-center">
-              Your queue is empty.
-            </p>
+            <div className="text-center py-8 text-gray-400">
+              <p>Queue is empty</p>
+            </div>
           )}
         </div>
       </div>

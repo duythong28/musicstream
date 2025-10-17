@@ -8,7 +8,7 @@ const Button = ({
   type = "button",
   ...props 
 }) => {
-  const baseStyles = "rounded-full font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseStyles = "rounded-full flex justify-center flex-row gap-2 items-center font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
   
   const variants = {
     primary: "bg-primary text-white hover:bg-green-500",

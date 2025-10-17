@@ -26,6 +26,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import SearchPage from "./pages/SearchPage";
+import VisualizerPage from "./pages/VisualizerPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const CLERK_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -122,32 +124,50 @@ function App() {
               path="/*"
               element={
                 <SignedIn>
-                  <MainLayout>
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      <Route path="/songs" element={<SongsPage />} />
-                      <Route path="/albums" element={<AlbumsPage />} />
-                      <Route path="/albums/:id" element={<AlbumDetailPage />} />
-                      <Route path="/library" element={<MyLibraryPage />} />
-                      <Route path="/search" element={<SearchPage />} />
-                      <Route
-                        path="/artist"
-                        element={
-                          <ProtectedRoute requireRole="artist">
-                            <ArtistDashboard />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin"
-                        element={
-                          <ProtectedRoute requireRole="admin">
-                            <AdminDashboard />
-                          </ProtectedRoute>
-                        }
-                      />
-                    </Routes>
-                  </MainLayout>
+                  <Routes>
+                    {/* Visualizer - No Layout */}
+                    <Route path="/visualizer" element={<VisualizerPage />} />
+
+                    {/* Routes with Layout */}
+                    <Route
+                      path="/*"
+                      element={
+                        <MainLayout>
+                          <Routes>
+                            <Route path="/" element={<HomePage />} />
+                            <Route path="/songs" element={<SongsPage />} />
+                            <Route path="/albums" element={<AlbumsPage />} />
+                            <Route
+                              path="/albums/:id"
+                              element={<AlbumDetailPage />}
+                            />
+                            <Route
+                              path="/library"
+                              element={<MyLibraryPage />}
+                            />
+                            <Route path="/search" element={<SearchPage />} />
+                            <Route path="/profile" element={<ProfilePage />} />
+                            <Route
+                              path="/artist"
+                              element={
+                                <ProtectedRoute requireRole="artist">
+                                  <ArtistDashboard />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
+                              path="/admin"
+                              element={
+                                <ProtectedRoute requireRole="admin">
+                                  <AdminDashboard />
+                                </ProtectedRoute>
+                              }
+                            />
+                          </Routes>
+                        </MainLayout>
+                      }
+                    />
+                  </Routes>
                 </SignedIn>
               }
             />
