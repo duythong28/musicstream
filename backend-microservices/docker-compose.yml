@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # MongoDB
   mongo:
     image: mongo:6
     container_name: mongodb
@@ -13,7 +12,6 @@ services:
     networks:
       - microservices-network
 
-  # User Service
   user-service:
     build: ./user-service
     container_name: user-service
@@ -24,12 +22,12 @@ services:
       - PORT=3001
       - MONGODB_URI=mongodb://mongo:27017/users_db
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
     depends_on:
       - mongo
     networks:
       - microservices-network
 
-  # Song Service
   song-service:
     build: ./song-service
     container_name: song-service
@@ -40,15 +38,18 @@ services:
       - PORT=3002
       - MONGODB_URI=mongodb://mongo:27017/songs_db
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
       - USER_SERVICE_URL=http://user-service:3001
       - ALBUM_SERVICE_URL=http://album-service:3003
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
     depends_on:
       - mongo
       - user-service
     networks:
       - microservices-network
 
-  # Album Service
   album-service:
     build: ./album-service
     container_name: album-service
@@ -59,8 +60,12 @@ services:
       - PORT=3003
       - MONGODB_URI=mongodb://mongo:27017/albums_db
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
       - USER_SERVICE_URL=http://user-service:3001
       - SONG_SERVICE_URL=http://song-service:3002
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
     depends_on:
       - mongo
       - user-service
@@ -68,7 +73,6 @@ services:
     networks:
       - microservices-network
 
-  # API Gateway
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -78,6 +82,7 @@ services:
     environment:
       - PORT=3000
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
       - USER_SERVICE_URL=http://user-service:3001
       - SONG_SERVICE_URL=http://song-service:3002
       - ALBUM_SERVICE_URL=http://album-service:3003
