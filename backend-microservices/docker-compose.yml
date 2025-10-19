@@ -1,16 +1,6 @@
 version: '3.8'
 
 services:
-  mongo:
-    image: mongo:6
-    container_name: mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - microservices-network
 
   user-service:
     build: ./user-service
@@ -20,11 +10,9 @@ services:
       - "3001:3001"
     environment:
       - PORT=3001
-      - MONGODB_URI=mongodb://mongo:27017/users_db
+      - MONGODB_URI=${MONGO_URI}/users_db?retryWrites=true&w=majority&appName=project
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
       - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
-    depends_on:
-      - mongo
     networks:
       - microservices-network
 
@@ -36,7 +24,7 @@ services:
       - "3002:3002"
     environment:
       - PORT=3002
-      - MONGODB_URI=mongodb://mongo:27017/songs_db
+      - MONGODB_URI=${MONGO_URI}/songs_db?retryWrites=true&w=majority&appName=project
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
       - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
       - USER_SERVICE_URL=http://user-service:3001
@@ -45,7 +33,7 @@ services:
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
     depends_on:
-      - mongo
+
       - user-service
     networks:
       - microservices-network
@@ -58,7 +46,7 @@ services:
       - "3003:3003"
     environment:
       - PORT=3003
-      - MONGODB_URI=mongodb://mongo:27017/albums_db
+      - MONGODB_URI=${MONGO_URI}/albums_db?retryWrites=true&w=majority&appName=project
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
       - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
       - USER_SERVICE_URL=http://user-service:3001
@@ -67,7 +55,6 @@ services:
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
     depends_on:
-      - mongo
       - user-service
       - song-service
     networks:
