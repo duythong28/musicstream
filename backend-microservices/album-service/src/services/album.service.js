@@ -1,49 +1,76 @@
 import { uploadToCloudinary } from "../config/cloudinary.config.js";
 import { Album } from "../models/album.model.js";
 import { callService } from "./httpClient.js";
+import { cacheGet, cacheSet, cacheDel, cacheInvalidatePattern } from "../config/redis.js"; 
+
+const CACHE_TTL = {
+  ALL_ALBUMS: 300, // 5 minutes
+  SINGLE_ALBUM: 600, // 10 minutes
+  USER_ALBUMS: 300, // 5 minutes
+};
 
 export const getAllAlbums = async () => {
-  // Only return public and visible albums
+  const cacheKey = "albums:all:public";
+  const cached = await cacheGet(cacheKey);
+  if (cached) {
+    console.log("Cache HIT: All albums");
+    return cached;
+  }
+
+  console.log("Cache MISS: All albums");
   const albums = await Album.find({ isPublic: true, isVisible: true }).sort({
     createdAt: -1,
   });
+
+  await cacheSet(cacheKey, albums, CACHE_TTL.ALL_ALBUMS);
   return albums;
 };
 
+// Get album by ID with songs
 export const getAlbumById = async (albumId, userId = null) => {
-  const album = await Album.findById(albumId);
+  const cacheKey = `album:${albumId}`;
+  const cached = await cacheGet(cacheKey);
 
-  if (!album) {
-    throw new Error("Album not found");
+  let album;
+  if (cached) {
+    console.log(`Cache HIT: Album ${albumId}`);
+    album = cached;
+  } else {
+    console.log(`Cache MISS: Album ${albumId}`);
+    album = await Album.findById(albumId);
+    if (!album) {
+      throw new Error("Album not found");
+    }
+    album = album.toObject();
   }
 
-  // Check permission: if private, only creator can view
+  // Check access permission
   if (!album.isPublic && album.creatorId !== userId) {
     throw new Error("Access denied");
   }
 
-  // Get songs from Song Service
-  if (album.songIds.length > 0) {
+  if (!album.isVisible) {
+    throw new Error("Album not available");
+  }
+
+  // Fetch songs from Song Service
+  try {
     const songs = await callService("song", "/songs/batch", "POST", {
       ids: album.songIds,
     });
 
-    // Filter only public and visible songs for non-creators
-    let availableSongs = songs;
-    if (album.creatorId !== userId) {
-      availableSongs = songs.filter((s) => s.isPublic && s.isVisible);
-    }
-
-    return {
-      ...album.toObject(),
-      songs: availableSongs,
-    };
+    // Filter only public and visible songs
+    album.songs = songs.filter((s) => s.isPublic && s.isVisible);
+  } catch (error) {
+    console.error("Error fetching songs:", error);
+    album.songs = [];
   }
 
-  return {
-    ...album.toObject(),
-    songs: [],
-  };
+  if (!cached) {
+    await cacheSet(cacheKey, album, CACHE_TTL.SINGLE_ALBUM);
+  }
+
+  return album;
 };
 
 export const createAlbum = async (body, file, user) => {
@@ -75,6 +102,9 @@ export const createAlbum = async (body, file, user) => {
     isPublic,
     isVisible: true,
   });
+  // Invalidate cache
+  await cacheInvalidatePattern("albums:*");
+  await cacheInvalidatePattern(`user:${user._id}:albums`);
 
   return album;
 };
@@ -98,6 +128,11 @@ export const updateAlbum = async (albumId, albumData, user) => {
 
   Object.assign(album, albumData);
   await album.save();
+
+  // Invalidate cache
+  await cacheDel(`album:${albumId}`);
+  await cacheInvalidatePattern("albums:*");
+
   return album;
 };
 
@@ -114,6 +149,11 @@ export const deleteAlbum = async (albumId, user) => {
   }
 
   await Album.findByIdAndDelete(albumId);
+
+  // Invalidate cache
+  await cacheDel(`album:${albumId}`);
+  await cacheInvalidatePattern("albums:*");
+
   return album;
 };
 
@@ -142,6 +182,11 @@ export const addSongToAlbum = async (albumId, songId, user) => {
 
   album.songIds.push(songId);
   await album.save();
+
+  // Invalidate cache
+  await cacheDel(`album:${albumId}`);
+  await cacheInvalidatePattern("albums:*");
+
   return album;
 };
 
@@ -159,6 +204,11 @@ export const removeSongFromAlbum = async (albumId, songId, user) => {
 
   album.songIds = album.songIds.filter((id) => id !== songId);
   await album.save();
+
+  // Invalidate cache
+  await cacheDel(`album:${albumId}`);
+  await cacheInvalidatePattern("albums:*");
+
   return album;
 };
 
@@ -178,6 +228,9 @@ export const toggleAlbumVisibility = async (albumId, user) => {
   if (user.role === "artist") {
     album.isPublic = !album.isPublic;
     await album.save();
+    // Invalidate cache
+    await cacheDel(`album:${albumId}`);
+    await cacheInvalidatePattern("albums:*");
   } else {
     throw new Error("Users cannot make playlists public");
   }
@@ -186,9 +239,19 @@ export const toggleAlbumVisibility = async (albumId, user) => {
 };
 
 export const getUserAlbums = async (userId) => {
+  const cacheKey = `user:${userId}:albums`;
+  const cached = await cacheGet(cacheKey);
+  if (cached) {
+    console.log(`Cache HIT: User ${userId} albums`);
+    return cached;
+  }
+
+  console.log(`Cache MISS: User ${userId} albums`);
   const albums = await Album.find({ creatorId: userId }).sort({
     createdAt: -1,
   });
+
+  await cacheSet(cacheKey, albums, CACHE_TTL.USER_ALBUMS);
   return albums;
 };
 
@@ -207,5 +270,8 @@ export const adminToggleVisible = async (albumId) => {
 
   album.isVisible = !album.isVisible;
   await album.save();
+  // Invalidate cache
+  await cacheDel(`album:${albumId}`);
+  await cacheInvalidatePattern("albums:*");
   return album;
 };

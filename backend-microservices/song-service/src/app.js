@@ -6,6 +6,7 @@ import { connectDB } from "./config/db.js";
 import songRoutes from "./routes/song.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import { clerkMiddleware } from "@clerk/express";
+import { connectRedis } from "./config/redis.js";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await connectDB();
+    await connectRedis();
     app.listen(PORT, () => {
       console.log(`Song Service running on port ${PORT}`);
     });

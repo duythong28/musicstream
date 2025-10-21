@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
+import { connectRedis } from "./config/redis.js"; 
 import albumRoutes from "./routes/album.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import { clerkMiddleware } from "@clerk/express";
@@ -35,6 +36,7 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await connectDB();
+    await connectRedis();
     app.listen(PORT, () => {
       console.log(`Album Service running on port ${PORT}`);
     });
