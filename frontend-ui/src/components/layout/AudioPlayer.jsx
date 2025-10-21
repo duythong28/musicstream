@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePlayerStore } from "../../store/usePlayerStore";
+import { useAdaptiveStreaming } from "../../hooks/useAdaptiveStreaming";
 import {
   Play,
   Pause,
@@ -16,13 +17,19 @@ import { formatTime } from "../../utils/formatTime";
 import QueueModal from "../player/QueueModal";
 import AudioVisualizer from "../player/AudioVisualizer";
 import VisualizerControls from "../player/VisualizerControls";
+import QualitySelector from "../player/QualitySelector";
+import { useAudioContext } from "../../contexts/AudioContext";
 
 const AudioPlayer = () => {
   const audioRef = useRef(null);
+  const preloadAudioRef = useRef(null);
   const navigate = useNavigate();
   const [showQueue, setShowQueue] = useState(false);
   const [visualizerType, setVisualizerType] = useState("bars");
   const [showVisualizer, setShowVisualizer] = useState(true);
+  const [isLoadingQuality, setIsLoadingQuality] = useState(false);
+  const { initializeAudioContext, isInitialized } = useAudioContext();
+
   const {
     currentSong,
     isPlaying,
@@ -36,22 +43,41 @@ const AudioPlayer = () => {
     playPrevious,
     setVolume,
     setCurrentTime,
-    setDuration,
     toggleRepeat,
     toggleShuffle,
     setIsPlaying,
   } = usePlayerStore();
 
+  // Adaptive streaming hook
+  const {
+    audioUrl,
+    quality,
+    autoQuality,
+    networkSpeed,
+    changeQuality,
+    toggleAutoQuality,
+    getQualityLabel,
+    getNetworkLabel,
+    hasStreamingUrls,
+  } = useAdaptiveStreaming(currentSong);
+
   // Handle play/pause
   useEffect(() => {
-    if (audioRef.current) {
+    if (audioRef.current && audioUrl && !isLoadingQuality) {
       if (isPlaying) {
         audioRef.current.play();
       } else {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying, currentSong]);
+  }, [isPlaying, audioUrl, isLoadingQuality]);
+
+  // Initialize audio context when audio element is ready
+  useEffect(() => {
+    if (audioRef.current && !isInitialized) {
+      initializeAudioContext(audioRef.current);
+    }
+  }, [audioRef.current, isInitialized, initializeAudioContext]);
 
   // Handle volume change
   useEffect(() => {
@@ -60,17 +86,45 @@ const AudioPlayer = () => {
     }
   }, [volume]);
 
+  // Update audio source when URL changes (quality switch or song change)
+  useEffect(() => {
+    if (!audioRef.current || !audioUrl) return;
+
+    if (audioRef.current.src === audioUrl) return;
+
+    setIsLoadingQuality(true);
+
+    // Create or reuse a hidden audio element for preloading
+    if (!preloadAudioRef.current) {
+      preloadAudioRef.current = document.createElement("audio");
+    }
+    const preloadAudio = preloadAudioRef.current;
+    preloadAudio.src = audioUrl;
+    preloadAudio.preload = "auto";
+    preloadAudio.currentTime = currentTime;
+
+    const handleCanPlay = () => {
+      // Only assign src when preloaded and can play
+      audioRef.current.src = audioUrl;
+      audioRef.current.currentTime = currentTime;
+      audioRef.current.load();
+      setIsLoadingQuality(false);
+      preloadAudio.removeEventListener("canplay", handleCanPlay);
+    };
+
+    preloadAudio.addEventListener("canplay", handleCanPlay);
+
+    preloadAudio.load();
+
+    return () => {
+      preloadAudio.removeEventListener("canplay", handleCanPlay);
+    };
+  }, [audioUrl]);
+
   // Handle time update
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  // Handle metadata loaded
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
     }
   };
 
@@ -101,9 +155,7 @@ const AudioPlayer = () => {
     <div className="fixed bottom-0 left-0 right-0 bg-dark-secondary border-t border-dark-tertiary">
       <audio
         ref={audioRef}
-        src={currentSong.audioUrl}
         onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
         crossOrigin="anonymous"
       />
@@ -114,7 +166,7 @@ const AudioPlayer = () => {
           showVisualizer ? "block" : "hidden"
         }`}
       >
-        <AudioVisualizer audioRef={audioRef} type={visualizerType} />
+        <AudioVisualizer type={visualizerType} />
       </div>
 
       <div className="px-4 py-3">
@@ -146,12 +198,18 @@ const AudioPlayer = () => {
               src={currentSong.imageUrl}
               alt={currentSong.title}
               className="w-14 h-14 rounded-lg cursor-pointer hover:opacity-80 transition"
-              // onClick={() => navigate("/visualizer")}
+              onClick={() => navigate("/visualizer")}
               title="Open Fullscreen Visualizer"
             />
-            <div>
+            <div className="min-w-0">
               <h4 className="font-semibold">{currentSong.title}</h4>
               <p className="text-sm text-gray-400">{currentSong.artistName}</p>
+              {hasStreamingUrls && (
+                <p className="text-xs text-gray-500">
+                  Quality: {getQualityLabel()}
+                  {autoQuality && ` (${getNetworkLabel()})`}
+                </p>
+              )}
             </div>
           </div>
 
@@ -218,6 +276,19 @@ const AudioPlayer = () => {
               setIsVisible={setShowVisualizer}
             />
 
+            {/* Quality Selector */}
+            <QualitySelector
+              quality={quality}
+              autoQuality={autoQuality}
+              networkSpeed={networkSpeed}
+              onQualityChange={changeQuality}
+              onToggleAuto={toggleAutoQuality}
+              getQualityLabel={getQualityLabel}
+              getNetworkLabel={getNetworkLabel}
+              hasStreamingUrls={hasStreamingUrls}
+            />
+
+            {/* Volume Control */}
             <div className="flex items-center space-x-2">
               <Volume2 size={20} className="text-gray-400" />
               <input

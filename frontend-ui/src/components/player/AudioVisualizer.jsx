@@ -1,83 +1,52 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePlayerStore } from "../../store/usePlayerStore";
+import { useAudioContext } from "../../contexts/AudioContext";
 
-const AudioVisualizer = ({ audioRef, type = "bars" }) => {
+const AudioVisualizer = ({ type = "bars" }) => {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
-  const analyserRef = useRef(null);
-  const dataArrayRef = useRef(null);
-  const audioContextRef = useRef(null);
-  const sourceRef = useRef(null);
   const { isPlaying } = usePlayerStore();
+  const { isInitialized, getAnalyserData } = useAudioContext();
 
   useEffect(() => {
-    if (!audioRef?.current) return;
-
-    const initAudio = async () => {
-      try {
-        // Create audio context if it doesn't exist
-        if (!audioContextRef.current) {
-          audioContextRef.current = new (window.AudioContext ||
-            window.webkitAudioContext)();
-        }
-
-        // Create analyser if it doesn't exist
-        if (!analyserRef.current) {
-          analyserRef.current = audioContextRef.current.createAnalyser();
-          analyserRef.current.fftSize = 512;
-          const bufferLength = analyserRef.current.frequencyBinCount;
-          dataArrayRef.current = new Uint8Array(bufferLength);
-        }
-
-        // Create source and connect only once
-        if (!sourceRef.current) {
-          sourceRef.current = audioContextRef.current.createMediaElementSource(
-            audioRef.current
-          );
-          sourceRef.current.connect(analyserRef.current);
-          analyserRef.current.connect(audioContextRef.current.destination);
-        }
-      } catch (error) {
-        console.error("Error initializing audio visualizer:", error);
-      }
-    };
-
-    initAudio();
-  }, [audioRef]);
-
-  useEffect(() => {
-    if (!canvasRef.current || !analyserRef.current || !dataArrayRef.current)
-      return;
+    if (!isInitialized || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
     const draw = () => {
       if (!isPlaying) {
+        // Draw static bars when paused
         drawStatic(ctx, canvas);
         return;
       }
 
       animationRef.current = requestAnimationFrame(draw);
-      analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+
+      const dataArray = getAnalyserData();
+      if (!dataArray) return;
 
       if (type === "bars") {
-        drawBars(ctx, canvas, dataArrayRef.current);
+        drawBars(ctx, canvas, dataArray);
       } else if (type === "wave") {
-        drawWave(ctx, canvas, dataArrayRef.current);
+        drawWave(ctx, canvas, dataArray);
       } else if (type === "circular") {
-        drawCircular(ctx, canvas, dataArrayRef.current);
+        drawCircular(ctx, canvas, dataArray);
       }
     };
 
-    draw();
+    if (isPlaying) {
+      draw();
+    } else {
+      drawStatic(ctx, canvas);
+    }
 
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPlaying, type]);
+  }, [isPlaying, isInitialized, type, getAnalyserData]);
 
   const drawBars = (ctx, canvas, dataArray) => {
     const width = canvas.width;

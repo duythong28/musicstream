@@ -9,6 +9,7 @@ import {
 import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import { useAuthStore } from "./store/useAuthStore";
+import { AudioContextProvider } from "./contexts/AudioContext";
 
 // Layout
 import Navbar from "./components/layout/Navbar";
@@ -89,101 +90,122 @@ const AuthSync = ({ children }) => {
 const MainLayout = ({ children }) => {
   return (
     <div className="h-screen flex flex-col bg-dark">
+      {children}
+      <AudioPlayer />
+    </div>
+  );
+};
+
+const SidebarLayout = ({ children }) => {
+  return (
+    <>
       <Navbar />
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
         <main className="flex-1 overflow-y-auto p-8 pb-32">{children}</main>
       </div>
-      <AudioPlayer />
-    </div>
+    </>
   );
 };
 
 function App() {
   return (
     <ClerkProvider publishableKey={CLERK_KEY}>
-      <BrowserRouter>
-        <AuthSync>
-          <Toaster
-            position="top-center"
-            toastOptions={{
-              style: {
-                background: "#282828",
-                color: "#fff",
-              },
-            }}
-          />
-
-          <Routes>
-            {/* Public Auth Routes */}
-            <Route path="/sign-in/*" element={<SignInPage />} />
-            <Route path="/sign-up/*" element={<SignUpPage />} />
-
-            {/* Protected Routes */}
-            <Route
-              path="/*"
-              element={
-                <SignedIn>
-                  <Routes>
-                    {/* Visualizer - No Layout */}
-                    <Route path="/visualizer" element={<VisualizerPage />} />
-
-                    {/* Routes with Layout */}
-                    <Route
-                      path="/*"
-                      element={
-                        <MainLayout>
-                          <Routes>
-                            <Route path="/" element={<HomePage />} />
-                            <Route path="/songs" element={<SongsPage />} />
-                            <Route path="/albums" element={<AlbumsPage />} />
-                            <Route
-                              path="/albums/:id"
-                              element={<AlbumDetailPage />}
-                            />
-                            <Route
-                              path="/library"
-                              element={<MyLibraryPage />}
-                            />
-                            <Route path="/search" element={<SearchPage />} />
-                            <Route path="/profile" element={<ProfilePage />} />
-                            <Route
-                              path="/artist"
-                              element={
-                                <ProtectedRoute requireRole="artist">
-                                  <ArtistDashboard />
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/admin"
-                              element={
-                                <ProtectedRoute requireRole="admin">
-                                  <AdminDashboard />
-                                </ProtectedRoute>
-                              }
-                            />
-                          </Routes>
-                        </MainLayout>
-                      }
-                    />
-                  </Routes>
-                </SignedIn>
-              }
+      <AudioContextProvider>
+        <BrowserRouter>
+          <AuthSync>
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                style: {
+                  background: "#282828",
+                  color: "#fff",
+                },
+              }}
             />
 
-            {/* Redirect to sign-in if not authenticated */}
-            <Route
-              path="/*"
-              element={
-                <SignedOut>
-                  <Navigate to="/sign-in" replace />
-                </SignedOut>
-              }
-            />
-          </Routes>
-        </AuthSync>
-      </BrowserRouter>
+            <Routes>
+              {/* Public Auth Routes */}
+              <Route path="/sign-in/*" element={<SignInPage />} />
+              <Route path="/sign-up/*" element={<SignUpPage />} />
+
+              {/* Protected Routes */}
+              <Route
+                path="/*"
+                element={
+                  <SignedIn>
+                    <MainLayout>
+                      <Routes>
+                        <Route
+                          path="/visualizer"
+                          element={<VisualizerPage />}
+                        />
+                        <Route
+                          path="/*"
+                          element={
+                            <SidebarLayout>
+                              <Routes>
+                                <Route path="/" element={<HomePage />} />
+                                <Route path="/songs" element={<SongsPage />} />
+                                <Route
+                                  path="/albums"
+                                  element={<AlbumsPage />}
+                                />
+                                <Route
+                                  path="/albums/:id"
+                                  element={<AlbumDetailPage />}
+                                />
+                                <Route
+                                  path="/library"
+                                  element={<MyLibraryPage />}
+                                />
+                                <Route
+                                  path="/search"
+                                  element={<SearchPage />}
+                                />
+                                <Route
+                                  path="/profile"
+                                  element={<ProfilePage />}
+                                />
+                                <Route
+                                  path="/artist"
+                                  element={
+                                    <ProtectedRoute requireRole="artist">
+                                      <ArtistDashboard />
+                                    </ProtectedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin"
+                                  element={
+                                    <ProtectedRoute requireRole="admin">
+                                      <AdminDashboard />
+                                    </ProtectedRoute>
+                                  }
+                                />
+                              </Routes>
+                            </SidebarLayout>
+                          }
+                        />
+                      </Routes>
+                    </MainLayout>
+                  </SignedIn>
+                }
+              />
+
+              {/* Redirect to sign-in if not authenticated */}
+              <Route
+                path="/*"
+                element={
+                  <SignedOut>
+                    <Navigate to="/sign-in" replace />
+                  </SignedOut>
+                }
+              />
+            </Routes>
+          </AuthSync>
+        </BrowserRouter>
+      </AudioContextProvider>
     </ClerkProvider>
   );
 }

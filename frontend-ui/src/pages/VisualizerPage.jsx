@@ -7,7 +7,7 @@ import { X, Maximize2, Minimize2 } from "lucide-react";
 
 const VisualizerPage = () => {
   const navigate = useNavigate();
-  const { currentSong } = usePlayerStore();
+  const { currentSong, isPlaying } = usePlayerStore();
   const [visualizerType, setVisualizerType] = useState("bars");
   const [showVisualizer, setShowVisualizer] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -66,7 +66,6 @@ const VisualizerPage = () => {
   }
 
   // Get audio element from main player
-  const audioElement = document.querySelector("audio");
 
   return (
     <div
@@ -117,17 +116,16 @@ const VisualizerPage = () => {
       <div className="flex-1 flex items-center justify-center p-8">
         {showVisualizer ? (
           <div className="w-full max-w-6xl h-96">
-            <AudioVisualizer
-              audioRef={{ current: audioElement }}
-              type={visualizerType}
-            />
+            <AudioVisualizer type={visualizerType} />
           </div>
         ) : (
           <div className="text-center">
             <img
               src={currentSong.imageUrl}
               alt={currentSong.title}
-              className="w-96 h-96 rounded-2xl shadow-2xl mx-auto mb-8 animate-spin-slow"
+              className={`w-96 h-96 ${
+                isPlaying ? " animate-spin-slow rounded-full" : "rounded-2xl"
+              } shadow-2xl mx-auto mb-8`}
             />
             <h1 className="text-4xl font-bold mb-2">{currentSong.title}</h1>
             <p className="text-2xl text-gray-400">{currentSong.artistName}</p>

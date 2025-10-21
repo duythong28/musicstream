@@ -11,7 +11,13 @@ export const usePlayerStore = create((set, get) => ({
   repeat: false,
   shuffle: false,
 
-  setCurrentSong: (song) => set({ currentSong: song, isPlaying: true }),
+  setCurrentSong: (song) =>
+    set({
+      currentSong: song,
+      isPlaying: true,
+      duration: song.duration || 0,
+      currentTime: 0,
+    }),
 
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
 
@@ -23,41 +29,57 @@ export const usePlayerStore = create((set, get) => ({
       currentIndex: startIndex,
       currentSong: songs[startIndex],
       isPlaying: true,
+      duration: songs[startIndex].duration || 0,
+      currentTime: 0,
     }),
 
   playNext: () => {
     const { queue, currentIndex, shuffle, repeat } = get();
-    
+
     if (shuffle) {
       const nextIndex = Math.floor(Math.random() * queue.length);
       set({
         currentIndex: nextIndex,
         currentSong: queue[nextIndex],
         isPlaying: true,
+        duration: queue[nextIndex].duration || 0,
+        currentTime: 0,
       });
     } else if (currentIndex < queue.length - 1) {
       set({
         currentIndex: currentIndex + 1,
         currentSong: queue[currentIndex + 1],
         isPlaying: true,
+        duration: queue[currentIndex + 1].duration || 0,
+        currentTime: 0,
       });
     } else if (repeat) {
       set({
         currentIndex: 0,
         currentSong: queue[0],
         isPlaying: true,
+        duration: queue[0].duration || 0,
+        currentTime: 0,
+      });
+    } else {
+      // End of queue, stop playback
+      set({
+        isPlaying: false,
+        currentTime: 0,
       });
     }
   },
 
   playPrevious: () => {
     const { queue, currentIndex } = get();
-    
+
     if (currentIndex > 0) {
       set({
         currentIndex: currentIndex - 1,
         currentSong: queue[currentIndex - 1],
         isPlaying: true,
+        duration: queue[currentIndex - 1].duration || 0,
+        currentTime: 0,
       });
     }
   },
@@ -78,5 +100,7 @@ export const usePlayerStore = create((set, get) => ({
       currentSong: null,
       currentIndex: 0,
       isPlaying: false,
+      duration: 0,
+      currentTime: 0,
     }),
 }));
