@@ -7,11 +7,17 @@ const api = axios.create({
   },
 });
 
+let getClerkToken = async () => null;
+
+export const setGetToken = (fn) => {
+  getClerkToken = fn;
+};
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
-  (config) => {
-    // Get token from Clerk (will be added in components)
-    const token = window.__clerk_token;
+  async (config) => {
+    // Get token from Clerk (will be added in components)\
+    const token = await getClerkToken();
     const sessionId = window.__clerk_session_id;
 
     if (token) {
