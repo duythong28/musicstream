@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # MongoDB
+  mongo:
+    image: mongo:6
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - microservices-network
+
+  # User Service
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongo:27017/users_db
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+    depends_on:
+      - mongo
+    networks:
+      - microservices-network
+
+  # Song Service
+  song-service:
+    build: ./song-service
+    container_name: song-service
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - MONGODB_URI=mongodb://mongo:27017/songs_db
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - USER_SERVICE_URL=http://user-service:3001
+      - ALBUM_SERVICE_URL=http://album-service:3003
+    depends_on:
+      - mongo
+      - user-service
+    networks:
+      - microservices-network
+
+  # Album Service
+  album-service:
+    build: ./album-service
+    container_name: album-service
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - MONGODB_URI=mongodb://mongo:27017/albums_db
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - USER_SERVICE_URL=http://user-service:3001
+      - SONG_SERVICE_URL=http://song-service:3002
+    depends_on:
+      - mongo
+      - user-service
+      - song-service
+    networks:
+      - microservices-network
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - USER_SERVICE_URL=http://user-service:3001
+      - SONG_SERVICE_URL=http://song-service:3002
+      - ALBUM_SERVICE_URL=http://album-service:3003
+    depends_on:
+      - user-service
+      - song-service
+      - album-service
+    networks:
+      - microservices-network
+
+volumes:
+  mongo_data:
+
+networks:
+  microservices-network:
+    driver: bridge
