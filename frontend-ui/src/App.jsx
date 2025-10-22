@@ -1,4 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import {
   ClerkProvider,
   SignedIn,
@@ -90,21 +96,24 @@ const AuthSync = ({ children }) => {
 const MainLayout = ({ children }) => {
   return (
     <div className="h-screen flex flex-col bg-dark">
-      {children}
-      <AudioPlayer />
-    </div>
-  );
-};
-
-const SidebarLayout = ({ children }) => {
-  return (
-    <>
       <Navbar />
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
         <main className="flex-1 overflow-y-auto p-8 pb-32">{children}</main>
       </div>
-    </>
+    </div>
+  );
+};
+
+// Global Audio Player (outside layout)
+const GlobalAudioPlayer = () => {
+  const location = useLocation();
+  const isVisualizerPage = location.pathname === "/visualizer";
+
+  return (
+    <div className={isVisualizerPage ? "hidden" : ""}>
+      <AudioPlayer />
+    </div>
   );
 };
 
@@ -134,61 +143,52 @@ function App() {
                 path="/*"
                 element={
                   <SignedIn>
-                    <MainLayout>
-                      <Routes>
-                        <Route
-                          path="/visualizer"
-                          element={<VisualizerPage />}
-                        />
-                        <Route
-                          path="/*"
-                          element={
-                            <SidebarLayout>
-                              <Routes>
-                                <Route path="/" element={<HomePage />} />
-                                <Route path="/songs" element={<SongsPage />} />
-                                <Route
-                                  path="/albums"
-                                  element={<AlbumsPage />}
-                                />
-                                <Route
-                                  path="/albums/:id"
-                                  element={<AlbumDetailPage />}
-                                />
-                                <Route
-                                  path="/library"
-                                  element={<MyLibraryPage />}
-                                />
-                                <Route
-                                  path="/search"
-                                  element={<SearchPage />}
-                                />
-                                <Route
-                                  path="/profile"
-                                  element={<ProfilePage />}
-                                />
-                                <Route
-                                  path="/artist"
-                                  element={
-                                    <ProtectedRoute requireRole="artist">
-                                      <ArtistDashboard />
-                                    </ProtectedRoute>
-                                  }
-                                />
-                                <Route
-                                  path="/admin"
-                                  element={
-                                    <ProtectedRoute requireRole="admin">
-                                      <AdminDashboard />
-                                    </ProtectedRoute>
-                                  }
-                                />
-                              </Routes>
-                            </SidebarLayout>
-                          }
-                        />
-                      </Routes>
-                    </MainLayout>
+                    <Routes>
+                      <Route path="/visualizer" element={<VisualizerPage />} />
+                      <Route
+                        path="/*"
+                        element={
+                          <MainLayout>
+                            <Routes>
+                              <Route path="/" element={<HomePage />} />
+                              <Route path="/songs" element={<SongsPage />} />
+                              <Route path="/albums" element={<AlbumsPage />} />
+                              <Route
+                                path="/albums/:id"
+                                element={<AlbumDetailPage />}
+                              />
+                              <Route
+                                path="/library"
+                                element={<MyLibraryPage />}
+                              />
+                              <Route path="/search" element={<SearchPage />} />
+                              <Route
+                                path="/profile"
+                                element={<ProfilePage />}
+                              />
+                              <Route
+                                path="/artist"
+                                element={
+                                  <ProtectedRoute requireRole="artist">
+                                    <ArtistDashboard />
+                                  </ProtectedRoute>
+                                }
+                              />
+                              <Route
+                                path="/admin"
+                                element={
+                                  <ProtectedRoute requireRole="admin">
+                                    <AdminDashboard />
+                                  </ProtectedRoute>
+                                }
+                              />
+                            </Routes>
+                          </MainLayout>
+                        }
+                      />
+                    </Routes>
+                    {/* Global Audio Player - Always mounted */}
+                    <GlobalAudioPlayer />
                   </SignedIn>
                 }
               />

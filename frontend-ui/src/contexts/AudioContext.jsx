@@ -6,9 +6,11 @@ export const AudioContextProvider = ({ children }) => {
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const sourceRef = useRef(null);
+  const audioElementRef = useRef(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const initializeAudioContext = (audioElement) => {
+    audioElementRef.current = audioElement;
     if (isInitialized || !audioElement) return;
 
     try {
@@ -56,6 +58,7 @@ export const AudioContextProvider = ({ children }) => {
       value={{
         audioContext: audioContextRef.current,
         analyser: analyserRef.current,
+        audioElement: audioElementRef.current,
         isInitialized,
         initializeAudioContext,
         getAnalyserData,
