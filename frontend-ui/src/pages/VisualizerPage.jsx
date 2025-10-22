@@ -219,7 +219,7 @@ const VisualizerPage = () => {
 
       {/* Bottom Controls */}
       <div
-        className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 z-20 transition-all duration-300 opacity-100 translate-y-0"
+        className="absolute bottom-0 left-0 right-0 pb-6 p-4 sm:p-8 z-20 transition-all duration-300 opacity-100 translate-y-0"
         style={{
           background:
             "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%)",
@@ -231,7 +231,7 @@ const VisualizerPage = () => {
             <span className="text-xs text-gray-400 w-12 text-right font-mono">
               {formatTime(currentTime)}
             </span>
-            <div className="flex-1 relative group">
+            <div className="flex-1 relative group mb-1">
               <input
                 type="range"
                 min="0"
@@ -335,16 +335,6 @@ const VisualizerPage = () => {
               />
             </div>
           </div>
-        </div>
-
-        {/* Info Footer */}
-        <div className="mt-4 sm:mt-6 text-center">
-          <p className="text-xs text-gray-400">
-            <span className="hidden sm:inline">
-              Press ESC to exit • Space to play/pause
-            </span>
-            <span className="sm:hidden">Tap to show controls</span>
-          </p>
         </div>
       </div>
     </div>

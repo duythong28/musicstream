@@ -35,6 +35,7 @@ import SignUpPage from "./pages/SignUpPage";
 import SearchPage from "./pages/SearchPage";
 import VisualizerPage from "./pages/VisualizerPage";
 import ProfilePage from "./pages/ProfilePage";
+import { setGetToken } from "./services/api";
 
 const CLERK_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -55,12 +56,20 @@ const AuthSync = ({ children }) => {
   const { getToken, userId } = useAuth();
   const { fetchCurrentUser, registerUser, setUser } = useAuthStore();
 
+  // Effect 1: Pass Clerk's getToken to the api module
+  useEffect(() => {
+    if (isLoaded) {
+      // Pass the function itself
+      setGetToken(() => getToken());
+    }
+  }, [isLoaded, getToken]);
+
   useEffect(() => {
     const syncUser = async () => {
       if (userId) {
         // Store token for API calls
         const token = await getToken();
-        window.__clerk_token = token;
+        // window.__clerk_token = token;
         window.__clerk_session_id = userId;
 
         try {
