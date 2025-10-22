@@ -10,7 +10,7 @@ import {
   toggleVisibility,
   getMyAlbums,
 } from "../controllers/album.controller.js";
-import { requireAuth } from "../middleware/auth.middleware.js";
+import { optionalAuth, requireAuth } from "../middleware/auth.middleware.js";
 import { requireArtist } from "../middleware/role.middleware.js";
 import { uploadAlbumImage } from "../middleware/upload.middleware.js";
 
@@ -18,7 +18,7 @@ const router = Router();
 
 // Public routes
 router.get("/", listAlbums);
-router.get("/:id", getAlbum);
+router.get("/:id", optionalAuth, getAlbum);
 
 // Authenticated routes (Artist + User)
 router.post("/", requireAuth, uploadAlbumImage, createNewAlbum);

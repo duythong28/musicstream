@@ -1,26 +1,108 @@
 // song-service/src/services/song.service.js
-import { uploadToCloudinary } from "../config/cloudinary.config.js";
+import {
+  uploadToCloudinary,
+  generateStreamingUrl,
+  extractPublicId,
+} from "../config/cloudinary.config.js";
 import { Song } from "../models/song.model.js";
+import {
+  cacheGet,
+  cacheSet,
+  cacheDel,
+  cacheInvalidatePattern,
+} from "../config/redis.js";
+
+// Cache TTL settings
+const CACHE_TTL = {
+  ALL_SONGS: 300, // 5 minutes
+  SINGLE_SONG: 600, // 10 minutes
+  ARTIST_SONGS: 300, // 5 minutes
+};
 
 export const getAllSongs = async () => {
-  // Only return public and visible songs
+  // Try cache first
+  const cacheKey = "songs:all:public";
+  const cached = await cacheGet(cacheKey);
+  if (cached) {
+    console.log("Cache HIT: All songs");
+    return cached;
+  }
+
+  console.log("Cache MISS: All songs");
   const songs = await Song.find({ isPublic: true, isVisible: true }).sort({
     createdAt: -1,
   });
-  return songs;
+
+  // Add streaming URLs
+  const songsWithStreaming = songs.map((song) => {
+    const songObj = song.toObject();
+
+    // Extract Cloudinary public_id from audioUrl
+    const publicId = extractPublicId(songObj.audioUrl);
+
+    if (publicId) {
+      songObj.streamingUrls = {
+        low: generateStreamingUrl(publicId, { bitrate: "64k" }),
+        medium: generateStreamingUrl(publicId, { bitrate: "128k" }),
+        high: generateStreamingUrl(publicId, { bitrate: "320k" }),
+      };
+    }
+
+    return songObj;
+  });
+
+  // Cache the result
+  await cacheSet(cacheKey, songsWithStreaming, CACHE_TTL.ALL_SONGS);
+
+  return songsWithStreaming;
 };
 
 export const getSongById = async (songId) => {
+  const cacheKey = `song:${songId}`;
+  const cached = await cacheGet(cacheKey);
+  if (cached) {
+    console.log(`Cache HIT: Song ${songId}`);
+    return cached;
+  }
+
+  console.log(`Cache MISS: Song ${songId}`);
   const song = await Song.findById(songId);
   if (!song) {
     throw new Error("Song not found");
   }
-  return song;
+
+  const songObj = song.toObject();
+
+  const publicId = extractPublicId(songObj.audioUrl);
+
+  if (publicId) {
+    songObj.streamingUrls = {
+      low: generateStreamingUrl(publicId, { bitrate: "64k" }),
+      medium: generateStreamingUrl(publicId, { bitrate: "128k" }),
+      high: generateStreamingUrl(publicId, { bitrate: "320k" }),
+    };
+  }
+
+  await cacheSet(cacheKey, songObj, CACHE_TTL.SINGLE_SONG);
+  return songObj;
 };
 
 export const getSongsByIds = async (songIds) => {
   const songs = await Song.find({ _id: { $in: songIds } });
-  return songs;
+  return songs.map((song) => {
+    const songObj = song.toObject();
+    const publicId = extractPublicId(songObj.audioUrl);
+
+    if (publicId) {
+      songObj.streamingUrls = {
+        low: generateStreamingUrl(publicId, { bitrate: "64k" }),
+        medium: generateStreamingUrl(publicId, { bitrate: "128k" }),
+        high: generateStreamingUrl(publicId, { bitrate: "320k" }),
+      };
+    }
+
+    return songObj;
+  });
 };
 
 export const createSong = async (body, files, user) => {
@@ -56,6 +138,11 @@ export const createSong = async (body, files, user) => {
   });
 
   await newSong.save();
+
+  // Invalidate caches
+  await cacheInvalidatePattern("songs:*");
+  await cacheInvalidatePattern(`artist:${user._id}:*`);
+
   return newSong;
 };
 
@@ -73,6 +160,12 @@ export const updateSong = async (songId, songData, user) => {
 
   Object.assign(song, songData);
   await song.save();
+
+  // Invalidate caches
+  await cacheDel(`song:${songId}`);
+  await cacheInvalidatePattern("songs:*");
+  await cacheInvalidatePattern(`artist:${song.artistId}:*`);
+
   return song;
 };
 
@@ -89,6 +182,12 @@ export const deleteSong = async (songId, user) => {
   }
 
   await Song.findByIdAndDelete(songId);
+
+  // Invalidate caches
+  await cacheDel(`song:${songId}`);
+  await cacheInvalidatePattern("songs:*");
+  await cacheInvalidatePattern(`artist:${song.artistId}:*`);
+
   return song;
 };
 
@@ -106,17 +205,33 @@ export const toggleSongVisibility = async (songId, user) => {
 
   song.isPublic = !song.isPublic;
   await song.save();
+
+  // Invalidate caches
+  await cacheDel(`song:${songId}`);
+  await cacheInvalidatePattern("songs:*");
+
   return song;
 };
 
 export const getArtistSongs = async (artistId) => {
+  const cacheKey = `artist:${artistId}:songs`;
+  const cached = await cacheGet(cacheKey);
+  if (cached) {
+    console.log(`Cache HIT: Artist ${artistId} songs`);
+    return cached;
+  }
+
+  console.log(`Cache MISS: Artist ${artistId} songs`);
   const songs = await Song.find({ artistId }).sort({ createdAt: -1 });
+
+  await cacheSet(cacheKey, songs, CACHE_TTL.ARTIST_SONGS);
   return songs;
 };
 
 // Admin services
 export const adminGetAllSongs = async () => {
   const songs = await Song.find().sort({ createdAt: -1 });
+
   return songs;
 };
 
@@ -129,5 +244,10 @@ export const adminToggleVisible = async (songId) => {
 
   song.isVisible = !song.isVisible;
   await song.save();
+
+  // Invalidate caches
+  await cacheDel(`song:${songId}`);
+  await cacheInvalidatePattern("songs:*");
+
   return song;
 };

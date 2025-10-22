@@ -29,3 +29,30 @@ export const uploadToCloudinary = (fileBuffer, options) => {
     Readable.from(fileBuffer).pipe(uploadStream);
   });
 };
+
+// Generate adaptive streaming URLs
+export const generateStreamingUrl = (publicId, options = {}) => {
+  const { bitrate = "128k", format = "mp3", quality = "auto" } = options;
+
+  return cloudinary.url(publicId, {
+    resource_type: "video",
+    format: format,
+    audio_codec: format,
+    bit_rate: bitrate,
+    quality: quality,
+    fetch_format: "auto",
+  });
+};
+
+// Helper: Extract Cloudinary public_id from URL
+export const extractPublicId = (url) => {
+  if (!url) return null;
+
+  try {
+    const match = url.match(/\/v\d+\/(.+)\.\w+$/);
+    return match ? match[1] : null;
+  } catch (error) {
+    console.error("Error extracting public_id:", error);
+    return null;
+  }
+};

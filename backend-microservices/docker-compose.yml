@@ -1,19 +1,7 @@
 version: '3.8'
 
 services:
-  # MongoDB
-  mongo:
-    image: mongo:6
-    container_name: mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - microservices-network
 
-  # User Service
   user-service:
     build: ./user-service
     container_name: user-service
@@ -22,14 +10,12 @@ services:
       - "3001:3001"
     environment:
       - PORT=3001
-      - MONGODB_URI=mongodb://mongo:27017/users_db
+      - MONGODB_URI=${MONGO_URI}/users_db?retryWrites=true&w=majority&appName=project
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
-    depends_on:
-      - mongo
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
     networks:
       - microservices-network
 
-  # Song Service
   song-service:
     build: ./song-service
     container_name: song-service
@@ -38,17 +24,20 @@ services:
       - "3002:3002"
     environment:
       - PORT=3002
-      - MONGODB_URI=mongodb://mongo:27017/songs_db
+      - MONGODB_URI=${MONGO_URI}/songs_db?retryWrites=true&w=majority&appName=project
+      - REDIS_URL=${REDIS_URL}
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
       - USER_SERVICE_URL=http://user-service:3001
       - ALBUM_SERVICE_URL=http://album-service:3003
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
     depends_on:
-      - mongo
       - user-service
     networks:
       - microservices-network
 
-  # Album Service
   album-service:
     build: ./album-service
     container_name: album-service
@@ -57,18 +46,21 @@ services:
       - "3003:3003"
     environment:
       - PORT=3003
-      - MONGODB_URI=mongodb://mongo:27017/albums_db
+      - MONGODB_URI=${MONGO_URI}/albums_db?retryWrites=true&w=majority&appName=project
+      - REDIS_URL=${REDIS_URL}
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
       - USER_SERVICE_URL=http://user-service:3001
       - SONG_SERVICE_URL=http://song-service:3002
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
     depends_on:
-      - mongo
       - user-service
       - song-service
     networks:
       - microservices-network
 
-  # API Gateway
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -78,6 +70,7 @@ services:
     environment:
       - PORT=3000
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
       - USER_SERVICE_URL=http://user-service:3001
       - SONG_SERVICE_URL=http://song-service:3002
       - ALBUM_SERVICE_URL=http://album-service:3003
