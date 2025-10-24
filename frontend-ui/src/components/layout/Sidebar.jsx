@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Music, Disc, Library } from "lucide-react";
+import { Home, Music, Disc, Library, Sparkles } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
 
   const menuItems = [
     { icon: Home, label: "Home", path: "/" },
+    { icon: Sparkles, label: "For You", path: "/for-you" },
     { icon: Music, label: "Songs", path: "/songs" },
     { icon: Disc, label: "Albums", path: "/albums" },
     { icon: Library, label: "My Library", path: "/library" },

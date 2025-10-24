@@ -36,10 +36,11 @@ import SearchPage from "./pages/SearchPage";
 import VisualizerPage from "./pages/VisualizerPage";
 import ProfilePage from "./pages/ProfilePage";
 import { setGetToken } from "./services/api";
+import ForYouPage from "./pages/ForYouPage";
+import SongDetailPage from "./pages/SongDetailPage";
 
 const CLERK_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Protected Route Component
 const ProtectedRoute = ({ children, requireRole }) => {
   const { user } = useAuthStore();
 
@@ -56,10 +57,8 @@ const AuthSync = ({ children }) => {
   const { getToken, userId } = useAuth();
   const { fetchCurrentUser, registerUser, setUser } = useAuthStore();
 
-  // Effect 1: Pass Clerk's getToken to the api module
   useEffect(() => {
     if (isLoaded) {
-      // Pass the function itself
       setGetToken(() => getToken());
     }
   }, [isLoaded, getToken]);
@@ -67,18 +66,13 @@ const AuthSync = ({ children }) => {
   useEffect(() => {
     const syncUser = async () => {
       if (userId) {
-        // Store token for API calls
-        const token = await getToken();
-        // window.__clerk_token = token;
         window.__clerk_session_id = userId;
 
         try {
-          // Try to get existing user
           const existingUser = await fetchCurrentUser();
 
           setUser(existingUser);
         } catch (error) {
-          // Register new user
           try {
             const newUser = await registerUser({
               clerkId: clerkUser.id,
@@ -101,7 +95,6 @@ const AuthSync = ({ children }) => {
   return children;
 };
 
-// Main Layout
 const MainLayout = ({ children }) => {
   return (
     <div className="h-screen flex flex-col bg-dark">
@@ -114,7 +107,6 @@ const MainLayout = ({ children }) => {
   );
 };
 
-// Global Audio Player (outside layout)
 const GlobalAudioPlayer = () => {
   const location = useLocation();
   const isVisualizerPage = location.pathname === "/visualizer";
@@ -143,11 +135,9 @@ function App() {
             />
 
             <Routes>
-              {/* Public Auth Routes */}
               <Route path="/sign-in/*" element={<SignInPage />} />
               <Route path="/sign-up/*" element={<SignUpPage />} />
 
-              {/* Protected Routes */}
               <Route
                 path="/*"
                 element={
@@ -160,7 +150,12 @@ function App() {
                           <MainLayout>
                             <Routes>
                               <Route path="/" element={<HomePage />} />
+                              <Route path="/for-you" element={<ForYouPage />} />
                               <Route path="/songs" element={<SongsPage />} />
+                              <Route
+                                path="/songs/:id"
+                                element={<SongDetailPage />}
+                              />
                               <Route path="/albums" element={<AlbumsPage />} />
                               <Route
                                 path="/albums/:id"
@@ -196,13 +191,11 @@ function App() {
                         }
                       />
                     </Routes>
-                    {/* Global Audio Player - Always mounted */}
                     <GlobalAudioPlayer />
                   </SignedIn>
                 }
               />
 
-              {/* Redirect to sign-in if not authenticated */}
               <Route
                 path="/*"
                 element={

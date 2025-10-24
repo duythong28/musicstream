@@ -19,6 +19,7 @@ import AudioVisualizer from "../player/AudioVisualizer";
 import VisualizerControls from "../player/VisualizerControls";
 import QualitySelector from "../player/QualitySelector";
 import { useAudioContext } from "../../contexts/AudioContext";
+import { recommendationService } from "../../services/recommendationService";
 
 const AudioPlayer = () => {
   const audioRef = useRef(null);
@@ -29,6 +30,9 @@ const AudioPlayer = () => {
   const [showVisualizer, setShowVisualizer] = useState(true);
   const [isLoadingQuality, setIsLoadingQuality] = useState(false);
   const { initializeAudioContext, isInitialized } = useAudioContext();
+  const hasTrackedPlayRef = useRef(false);
+  const hasTrackedCompleteRef = useRef(false);
+  const lastSongIdRef = useRef(null);
 
   const {
     currentSong,
@@ -121,11 +125,68 @@ const AudioPlayer = () => {
     };
   }, [audioUrl]);
 
-  // Handle time update
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
+  // Reset tracking when song changes
+  useEffect(() => {
+    if (currentSong && currentSong._id !== lastSongIdRef.current) {
+      hasTrackedPlayRef.current = false;
+      hasTrackedCompleteRef.current = false;
+      lastSongIdRef.current = currentSong._id;
     }
+  }, [currentSong?._id]);
+
+  // Handle time update with tracking logic
+  const handleTimeUpdate = () => {
+    if (!audioRef.current) return;
+
+    const time = audioRef.current.currentTime;
+    setCurrentTime(time);
+
+    if (
+      !currentSong ||
+      !isPlaying ||
+      (currentSong && currentSong?._id !== lastSongIdRef.current)
+    )
+      return;
+
+    // Track play after 3 seconds of listening
+    if (time > 3 && !hasTrackedPlayRef.current) {
+      recommendationService.trackPlay(currentSong._id);
+      hasTrackedPlayRef.current = true;
+    }
+
+    // Track completion when user listens to 80%+ of song
+    if (duration > 0 && !hasTrackedCompleteRef.current) {
+      const completionPercentage = (time / duration) * 100;
+      if (completionPercentage >= 80) {
+        recommendationService.trackComplete(currentSong._id);
+        hasTrackedCompleteRef.current = true;
+      }
+    }
+  };
+
+  // Track skip when moving to next song before 50% completion
+  const handleNext = () => {
+    if (currentSong && duration > 0) {
+      const completionPercentage = (currentTime / duration) * 100;
+      if (completionPercentage < 50 && hasTrackedPlayRef.current) {
+        recommendationService.trackSkip(currentSong._id);
+      }
+    }
+    playNext();
+  };
+
+  const handlePrevious = () => {
+    if (currentSong && duration > 0) {
+      const completionPercentage = (currentTime / duration) * 100;
+      if (
+        completionPercentage < 50 &&
+        hasTrackedPlayRef.current &&
+        currentTime > 3
+      ) {
+        recommendationService.trackSkip(currentSong._id);
+      }
+    }
+    playPrevious();
   };
 
   // Handle song end
@@ -225,7 +286,7 @@ const AudioPlayer = () => {
             </button>
 
             <button
-              onClick={playPrevious}
+              onClick={handlePrevious}
               className="text-gray-400 hover:text-white transition"
             >
               <SkipBack size={24} />
@@ -243,7 +304,7 @@ const AudioPlayer = () => {
             </button>
 
             <button
-              onClick={playNext}
+              onClick={handleNext}
               className="text-gray-400 hover:text-white transition"
             >
               <SkipForward size={24} />

@@ -1,4 +1,3 @@
-// frontend/src/hooks/useAdaptiveStreaming.js
 import { useState, useEffect, useCallback } from "react";
 
 export const useAdaptiveStreaming = (song) => {

@@ -13,10 +13,8 @@ export const setGetToken = (fn) => {
   getClerkToken = fn;
 };
 
-// Request interceptor to add auth token
 api.interceptors.request.use(
   async (config) => {
-    // Get token from Clerk (will be added in components)\
     const token = await getClerkToken();
     const sessionId = window.__clerk_session_id;
 
@@ -34,12 +32,10 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - redirect to login
       window.location.href = "/sign-in";
     }
     return Promise.reject(error);
