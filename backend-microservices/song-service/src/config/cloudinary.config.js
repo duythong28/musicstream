@@ -3,14 +3,12 @@ import { Readable } from "stream";
 import dotenv from "dotenv";
 dotenv.config();
 
-// Configure Cloudinary with your credentials
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Helper function to upload a file buffer to Cloudinary
 export const uploadToCloudinary = (fileBuffer, options) => {
   console.log("Cloudinary config:", {
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -30,7 +28,6 @@ export const uploadToCloudinary = (fileBuffer, options) => {
   });
 };
 
-// Generate adaptive streaming URLs
 export const generateStreamingUrl = (publicId, options = {}) => {
   const { bitrate = "128k", format = "mp3", quality = "auto" } = options;
 
@@ -44,7 +41,6 @@ export const generateStreamingUrl = (publicId, options = {}) => {
   });
 };
 
-// Helper: Extract Cloudinary public_id from URL
 export const extractPublicId = (url) => {
   if (!url) return null;
 

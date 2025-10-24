@@ -1,4 +1,3 @@
-// song-service/src/controllers/admin.controller.js
 import {
   adminGetAllSongs,
   adminToggleVisible,

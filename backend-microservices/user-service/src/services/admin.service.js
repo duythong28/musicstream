@@ -1,4 +1,3 @@
-// user-service/src/services/admin.service.js
 import { User } from "../models/user.model.js";
 
 export const getAllUsers = async () => {

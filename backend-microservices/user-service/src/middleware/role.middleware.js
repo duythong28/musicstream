@@ -1,4 +1,3 @@
-// user-service/src/middleware/role.middleware.js
 import { User } from "../models/user.model.js";
 
 export const requireAdmin = async (req, res, next) => {

@@ -1,4 +1,3 @@
-// song-service/src/models/song.model.js
 import mongoose from "mongoose";
 
 const songSchema = new mongoose.Schema(

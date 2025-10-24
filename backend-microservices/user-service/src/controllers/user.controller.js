@@ -1,4 +1,3 @@
-// user-service/src/controllers/user.controller.js
 import { getUserById } from "../services/user.service.js";
 
 export const getUser = async (req, res) => {

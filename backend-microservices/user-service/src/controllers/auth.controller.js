@@ -1,4 +1,3 @@
-// user-service/src/controllers/auth.controller.js
 import { createUser, getUserByClerkId } from "../services/user.service.js";
 
 export const register = async (req, res) => {

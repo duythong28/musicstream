@@ -1,4 +1,3 @@
-// song-service/src/services/httpClient.js
 import axios from "axios";
 
 const services = {

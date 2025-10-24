@@ -1,4 +1,3 @@
-// user-service/src/services/user.service.js
 import { User } from "../models/user.model.js";
 
 export const createUser = async (userData) => {

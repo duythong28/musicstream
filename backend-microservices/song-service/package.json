@@ -6,7 +6,8 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "migrate:recombee": "node -r dotenv/config scripts/migrate-songs-to-recombee.js"
   },
   "dependencies": {
     "@clerk/express": "^1.7.39",
@@ -18,6 +19,7 @@
     "mongodb": "^5.9.2",
     "mongoose": "^7.8.7",
     "multer": "^2.0.2",
+    "recombee-api-client": "^6.0.0",
     "redis": "^4.6.0"
   },
   "devDependencies": {

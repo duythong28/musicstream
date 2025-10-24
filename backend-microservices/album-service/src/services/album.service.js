@@ -53,7 +53,6 @@ export const getAlbumById = async (albumId, userId = null) => {
     throw new Error("Album not available");
   }
 
-  // Fetch songs from Song Service
   try {
     const songs = await callService("song", "/songs/batch", "POST", {
       ids: album.songIds,
