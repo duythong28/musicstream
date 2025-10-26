@@ -6,6 +6,7 @@ import SimilarSongs from "../components/songs/SimilarSongs";
 import { Play, Clock, Calendar, User, ArrowLeft } from "lucide-react";
 import { formatTime } from "../utils/formatTime";
 import Button from "../components/common/Button";
+import { useColorExtractor } from "../hooks/useColorExtractor";
 
 const SongDetailPage = () => {
   const { id } = useParams();
@@ -13,6 +14,9 @@ const SongDetailPage = () => {
   const [song, setSong] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { setCurrentSong } = usePlayerStore();
+
+  // Extract colors from album art
+  const colors = useColorExtractor(song?.imageUrl);
 
   useEffect(() => {
     fetchSong();
@@ -49,73 +53,97 @@ const SongDetailPage = () => {
   }
 
   return (
-    <div>
-      {/* Back Button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center space-x-2 text-gray-400 hover:text-white mb-6 transition"
+    <div className="min-h-screen -m-8">
+      {/* Hero Section with Gradient Background */}
+      <div
+        className="relative"
+        style={{
+          background: `linear-gradient(180deg, ${colors.dominant} 0%, rgba(18,18,18,0.6) 100%)`,
+        }}
       >
-        <ArrowLeft size={20} />
-        <span>Back</span>
-      </button>
-
-      {/* Song Header */}
-      <div className="flex items-end space-x-6 mb-8">
-        <img
-          src={song.imageUrl}
-          alt={song.title}
-          className="w-64 h-64 rounded-lg shadow-2xl"
+        {/* Animated blur overlay */}
+        <div
+          className="absolute inset-0 opacity-20 blur-3xl"
+          style={{
+            background: `radial-gradient(circle at 30% 30%, ${colors.vibrant} 0%, transparent 70%)`,
+          }}
         />
-        <div className="flex-1">
-          <p className="text-sm font-semibold uppercase text-gray-400 mb-2">
-            Song
-          </p>
-          <h1 className="text-6xl font-bold mb-4">{song.title}</h1>
 
-          <div className="flex items-center space-x-4 text-gray-400">
-            <div className="flex items-center space-x-2">
-              <User size={16} />
-              <span>{song.artistName}</span>
-            </div>
+        <div className="relative px-8 pt-6 pb-8">
+          {/* Back Button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center space-x-2 text-gray-300 hover:text-white mb-6 transition control-button"
+          >
+            <ArrowLeft size={20} />
+            <span>Back</span>
+          </button>
 
-            {song.genre && (
-              <div className="flex items-center space-x-2">
-                <span>•</span>
-                <span>{song.genre}</span>
+          {/* Song Header */}
+          <div className="flex items-end space-x-6 mb-8">
+            <img
+              src={song.imageUrl}
+              alt={song.title}
+              className="w-64 h-64 rounded-lg shadow-2xl"
+            />
+            <div className="flex-1">
+              <p className="text-sm font-semibold uppercase text-gray-400 mb-2">
+                Song
+              </p>
+              <h1 className="text-6xl font-bold mb-4">{song.title}</h1>
+
+              <div className="flex items-center space-x-4 text-gray-400">
+                <div className="flex items-center space-x-2">
+                  <User size={16} />
+                  <span>{song.artistName}</span>
+                </div>
+
+                {song.genre && (
+                  <div className="flex items-center space-x-2">
+                    <span>•</span>
+                    <span>{song.genre}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2">
+                  <Clock size={16} />
+                  <span>{formatTime(song.duration)}</span>
+                </div>
+
+                {song.releaseYear && (
+                  <div className="flex items-center space-x-2">
+                    <Calendar size={16} />
+                    <span>{song.releaseYear}</span>
+                  </div>
+                )}
               </div>
-            )}
 
-            <div className="flex items-center space-x-2">
-              <Clock size={16} />
-              <span>{formatTime(song.duration)}</span>
+              {song.playCount > 0 && (
+                <div className="mt-4 text-sm text-gray-500">
+                  {song.playCount.toLocaleString()} plays
+                </div>
+              )}
             </div>
-
-            {song.releaseYear && (
-              <div className="flex items-center space-x-2">
-                <Calendar size={16} />
-                <span>{song.releaseYear}</span>
-              </div>
-            )}
           </div>
-
-          {song.playCount > 0 && (
-            <div className="mt-4 text-sm text-gray-500">
-              {song.playCount.toLocaleString()} plays
-            </div>
-          )}
         </div>
       </div>
+      <div
+        className="px-8 py-6"
+        style={{
+          background: `linear-gradient(180deg, rgba(18,18,18,0.6) 0%, #121212 20%)`,
+        }}
+      >
+        {/* Play Button */}
+        <div className="mb-8">
+          <Button onClick={() => setCurrentSong(song)} size="lg">
+            <Play size={20} className="mr-2" />
+            Play Song
+          </Button>
+        </div>
 
-      {/* Play Button */}
-      <div className="mb-8">
-        <Button onClick={() => setCurrentSong(song)} size="lg">
-          <Play size={20} className="mr-2" />
-          Play Song
-        </Button>
+        {/* Similar Songs */}
+        <SimilarSongs songId={song._id} />
       </div>
-
-      {/* Similar Songs */}
-      <SimilarSongs songId={song._id} />
     </div>
   );
 };
