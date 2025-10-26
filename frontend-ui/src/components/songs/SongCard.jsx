@@ -53,6 +53,7 @@ const SongCard = ({ song, showArtist = true }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              e.preventDefault();
               setShowMenu(!showMenu);
             }}
             className="p-2 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-black/70"
@@ -65,6 +66,7 @@ const SongCard = ({ song, showArtist = true }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   setShowAddToPlaylist(true);
                   setShowMenu(false);
                 }}
