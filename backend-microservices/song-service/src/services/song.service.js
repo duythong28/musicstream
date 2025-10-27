@@ -1,4 +1,3 @@
-// song-service/src/services/song.service.js
 import {
   uploadToCloudinary,
   generateStreamingUrl,
@@ -11,6 +10,7 @@ import {
   cacheDel,
   cacheInvalidatePattern,
 } from "../config/redis.js";
+import * as recombeeService from "./recombee.service.js";
 
 // Cache TTL settings
 const CACHE_TTL = {
@@ -139,6 +139,9 @@ export const createSong = async (body, files, user) => {
 
   await newSong.save();
 
+  // Add to Recombee
+  await recombeeService.addSongToRecombee(newSong);
+
   // Invalidate caches
   await cacheInvalidatePattern("songs:*");
   await cacheInvalidatePattern(`artist:${user._id}:*`);
@@ -182,6 +185,9 @@ export const deleteSong = async (songId, user) => {
   }
 
   await Song.findByIdAndDelete(songId);
+
+  // Remove from Recombee
+  await recombeeService.deleteSongFromRecombee(songId);
 
   // Invalidate caches
   await cacheDel(`song:${songId}`);
@@ -250,4 +256,211 @@ export const adminToggleVisible = async (songId) => {
   await cacheInvalidatePattern("songs:*");
 
   return song;
+};
+// Track song play with Recombee
+export const trackSongPlay = async (songId, userId) => {
+  try {
+    await recombeeService.trackInteraction(userId, songId, "play");
+
+    // Invalidate user's recommendations cache
+    await cacheDel(`recommendations:user:${userId}`);
+
+    return true;
+  } catch (error) {
+    console.error("Error tracking song play:", error);
+    return false;
+  }
+};
+
+// Track song completion
+export const trackSongComplete = async (songId, userId) => {
+  try {
+    await recombeeService.trackInteraction(userId, songId, "complete");
+    await cacheDel(`recommendations:user:${userId}`);
+    return true;
+  } catch (error) {
+    console.error("Error tracking song complete:", error);
+    return false;
+  }
+};
+
+// Track song skip
+export const trackSongSkip = async (songId, userId) => {
+  try {
+    await recombeeService.trackInteraction(userId, songId, "skip");
+    await cacheDel(`recommendations:user:${userId}`);
+    return true;
+  } catch (error) {
+    console.error("Error tracking song skip:", error);
+    return false;
+  }
+};
+
+// Get personalized recommendations for user
+export const getPersonalizedRecommendations = async (userId, count = 10) => {
+  const cacheKey = `recommendations:user:${userId}`;
+  const cached = await cacheGet(cacheKey);
+
+  if (cached) {
+    console.log(`Cache HIT: Recommendations for user ${userId}`);
+    return cached;
+  }
+
+  console.log(`Cache MISS: Recommendations for user ${userId}`);
+
+  try {
+    // Get recommendations from Recombee
+    const recommendations = await recombeeService.getRecommendations(
+      userId,
+      count
+    );
+
+    if (recommendations.length === 0) {
+      // Fallback to trending if no personalized recommendations
+      return getTrendingSongs(count);
+    }
+
+    // Fetch full song details from database
+    const songIds = recommendations.map((r) => r.songId);
+    const songs = await Song.find({
+      _id: { $in: songIds },
+      isPublic: true,
+      isVisible: true,
+    });
+
+    // Add streaming URLs
+    const songsWithStreaming = songs.map((song) => {
+      const songObj = song.toObject();
+      const publicId = extractPublicId(songObj.audioUrl);
+
+      if (publicId) {
+        songObj.streamingUrls = {
+          low: generateStreamingUrl(publicId, { bitrate: "64k" }),
+          medium: generateStreamingUrl(publicId, { bitrate: "128k" }),
+          high: generateStreamingUrl(publicId, { bitrate: "320k" }),
+        };
+      }
+
+      return songObj;
+    });
+
+    // Cache recommendations
+    await cacheSet(cacheKey, songsWithStreaming, CACHE_TTL.RECOMMENDATIONS);
+
+    return songsWithStreaming;
+  } catch (error) {
+    console.error("Error getting recommendations:", error);
+    // Fallback to trending
+    return getTrendingSongs(count);
+  }
+};
+
+// Get similar songs
+export const getSimilarSongs = async (songId, count = 10) => {
+  const cacheKey = `recommendations:similar:${songId}`;
+  const cached = await cacheGet(cacheKey);
+
+  if (cached) {
+    console.log(`Cache HIT: Similar songs for ${songId}`);
+    return cached;
+  }
+
+  console.log(`Cache MISS: Similar songs for ${songId}`);
+
+  try {
+    const recommendations = await recombeeService.getSimilarSongs(
+      songId,
+      count
+    );
+
+    if (recommendations.length === 0) {
+      return [];
+    }
+
+    // Fetch full song details
+    const songIds = recommendations.map((r) => r.songId);
+    const songs = await Song.find({
+      _id: { $in: songIds },
+      isPublic: true,
+      isVisible: true,
+    });
+
+    // Add streaming URLs
+    const songsWithStreaming = songs.map((song) => {
+      const songObj = song.toObject();
+      const publicId = extractPublicId(songObj.audioUrl);
+
+      if (publicId) {
+        songObj.streamingUrls = {
+          low: generateStreamingUrl(publicId, { bitrate: "64k" }),
+          medium: generateStreamingUrl(publicId, { bitrate: "128k" }),
+          high: generateStreamingUrl(publicId, { bitrate: "320k" }),
+        };
+      }
+
+      return songObj;
+    });
+
+    // Cache similar songs
+    await cacheSet(cacheKey, songsWithStreaming, CACHE_TTL.RECOMMENDATIONS);
+
+    return songsWithStreaming;
+  } catch (error) {
+    console.error("Error getting similar songs:", error);
+    return [];
+  }
+};
+
+// Get trending songs
+export const getTrendingSongs = async (count = 20) => {
+  const cacheKey = "recommendations:trending";
+  const cached = await cacheGet(cacheKey);
+
+  if (cached) {
+    console.log("Cache HIT: Trending songs");
+    return cached;
+  }
+
+  console.log("Cache MISS: Trending songs");
+
+  try {
+    const recommendations = await recombeeService.getTrendingSongs(count);
+
+    if (recommendations.length === 0) {
+      // Fallback to recent songs
+      return getAllSongs();
+    }
+
+    // Fetch full song details
+    const songIds = recommendations.map((r) => r.songId);
+    const songs = await Song.find({
+      _id: { $in: songIds },
+      isPublic: true,
+      isVisible: true,
+    });
+
+    // Add streaming URLs
+    const songsWithStreaming = songs.map((song) => {
+      const songObj = song.toObject();
+      const publicId = extractPublicId(songObj.audioUrl);
+
+      if (publicId) {
+        songObj.streamingUrls = {
+          low: generateStreamingUrl(publicId, { bitrate: "64k" }),
+          medium: generateStreamingUrl(publicId, { bitrate: "128k" }),
+          high: generateStreamingUrl(publicId, { bitrate: "320k" }),
+        };
+      }
+
+      return songObj;
+    });
+
+    // Cache trending songs
+    await cacheSet(cacheKey, songsWithStreaming, 300); // 5 minutes TTL
+
+    return songsWithStreaming;
+  } catch (error) {
+    console.error("Error getting trending songs:", error);
+    return getAllSongs();
+  }
 };

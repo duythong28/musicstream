@@ -1,4 +1,3 @@
-// user-service/src/routes/auth.route.js
 import { Router } from "express";
 import { register, getCurrentUser } from "../controllers/auth.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";

@@ -1,4 +1,3 @@
-// song-service/src/middleware/role.middleware.js
 export const requireArtist = async (req, res, next) => {
   try {
     if (

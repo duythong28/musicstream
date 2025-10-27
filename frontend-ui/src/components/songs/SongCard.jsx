@@ -3,6 +3,7 @@ import { Play, Pause, MoreVertical, ListPlus } from "lucide-react";
 import { usePlayerStore } from "../../store/usePlayerStore";
 import { formatTime } from "../../utils/formatTime";
 import AddToPlaylistModal from "./AddToPlaylistModal";
+import { Link } from "react-router-dom";
 
 const SongCard = ({ song, showArtist = true }) => {
   const { currentSong, isPlaying, setCurrentSong, togglePlay } =
@@ -21,7 +22,10 @@ const SongCard = ({ song, showArtist = true }) => {
 
   return (
     <>
-      <div className="group bg-dark-tertiary rounded-lg p-4 hover:bg-dark-hover transition-colors cursor-pointer relative">
+      <Link
+        to={`/songs/${song._id}`}
+        className="group bg-dark-tertiary rounded-lg p-4 hover:bg-dark-hover transition-colors cursor-pointer relative"
+      >
         <div className="relative mb-4">
           <img
             src={song.imageUrl}
@@ -29,7 +33,11 @@ const SongCard = ({ song, showArtist = true }) => {
             className="w-full aspect-square object-cover rounded-lg"
           />
           <button
-            onClick={handlePlay}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              handlePlay();
+            }}
             className="absolute bottom-2 right-2 w-12 h-12 bg-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all shadow-lg"
           >
             {isCurrentSong && isPlaying ? (
@@ -45,6 +53,7 @@ const SongCard = ({ song, showArtist = true }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              e.preventDefault();
               setShowMenu(!showMenu);
             }}
             className="p-2 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-black/70"
@@ -57,6 +66,7 @@ const SongCard = ({ song, showArtist = true }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   setShowAddToPlaylist(true);
                   setShowMenu(false);
                 }}
@@ -76,7 +86,7 @@ const SongCard = ({ song, showArtist = true }) => {
         <p className="text-xs text-gray-500 mt-1">
           {formatTime(song.duration)}
         </p>
-      </div>
+      </Link>
 
       {/* Click outside to close menu */}
       {showMenu && (

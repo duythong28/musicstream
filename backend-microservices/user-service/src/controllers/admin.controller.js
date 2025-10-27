@@ -1,4 +1,3 @@
-// user-service/src/controllers/admin.controller.js
 import {
   getAllUsers,
   toggleBlockUser,

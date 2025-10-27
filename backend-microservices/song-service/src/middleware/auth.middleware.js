@@ -1,4 +1,3 @@
-// song-service/src/middleware/auth.middleware.js
 import { getAuth } from "@clerk/express";
 import { callService } from "../services/httpClient.js";
 

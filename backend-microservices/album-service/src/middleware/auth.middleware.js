@@ -9,7 +9,6 @@ export const requireAuth = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // Get user from User Service
     const user = await callService("user", `/auth/me`, "GET", null, {
       authorization: req.headers.authorization,
       "x-clerk-session-id": req.headers["x-clerk-session-id"],
@@ -31,7 +30,6 @@ export const optionalAuth = async (req, res, next) => {
       return next();
     }
 
-    // Try to get user from User Service; if it fails, continue without blocking
     const user = await callService("user", `/auth/me`, "GET", null, {
       authorization: req.headers.authorization,
       "x-clerk-session-id": req.headers["x-clerk-session-id"],
@@ -41,7 +39,6 @@ export const optionalAuth = async (req, res, next) => {
     req.user = user;
     return next();
   } catch (error) {
-    // On any error, don't enforce auth — proceed as unauthenticated
     return next();
   }
 };

@@ -13,7 +13,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(clerkMiddleware());
@@ -26,23 +25,19 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// Health check
 app.get("/health", (req, res) => {
   res.json({ status: "OK", service: "user-service" });
 });
 
-// Routes
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/admin", adminRoutes);
 
-// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong!" });
 });
 
-// Start server
 const startServer = async () => {
   try {
     await connectDB();

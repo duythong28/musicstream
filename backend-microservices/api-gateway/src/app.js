@@ -8,7 +8,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 
 app.use((req, res, next) => {
@@ -38,7 +37,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check
 app.get("/health", (req, res) => {
   res.json({
     status: "OK",
@@ -47,7 +45,6 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Service health checks
 app.get("/health/services", async (req, res) => {
   const services = {
     user: process.env.USER_SERVICE_URL || "http://localhost:3001",
@@ -73,7 +70,6 @@ app.get("/health/services", async (req, res) => {
   });
 });
 
-// Proxy configuration
 const proxyOptions = (target) => ({
   target,
   changeOrigin: true,
@@ -157,18 +153,15 @@ app.use(
   })
 );
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong!" });
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
   console.log(

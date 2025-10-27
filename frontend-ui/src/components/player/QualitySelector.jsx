@@ -1,4 +1,3 @@
-// frontend/src/components/player/QualitySelector.jsx
 import { useState } from "react";
 import { Settings, Check, Wifi } from "lucide-react";
 
@@ -15,7 +14,7 @@ const QualitySelector = ({
   const [isOpen, setIsOpen] = useState(false);
 
   if (!hasStreamingUrls) {
-    return null; // Don't show if no streaming URLs available
+    return null;
   }
 
   const qualities = [

@@ -1,4 +1,3 @@
-// song-service/src/routes/admin.route.js
 import { Router } from "express";
 import {
   getAllSongsAdmin,

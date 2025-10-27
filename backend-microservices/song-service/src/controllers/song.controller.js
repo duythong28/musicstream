@@ -1,4 +1,3 @@
-// song-service/src/controllers/song.controller.js
 import {
   getAllSongs,
   getSongById,
@@ -8,6 +7,12 @@ import {
   deleteSong,
   toggleSongVisibility,
   getArtistSongs,
+  trackSongPlay,
+  trackSongComplete,
+  trackSongSkip,
+  getPersonalizedRecommendations,
+  getSimilarSongs,
+  getTrendingSongs,
 } from "../services/song.service.js";
 
 export const listSongs = async (req, res) => {
@@ -78,6 +83,82 @@ export const getMyArtistSongs = async (req, res) => {
   try {
     const songs = await getArtistSongs(req.user._id.toString());
     res.json(songs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Track song play
+export const trackPlay = async (req, res) => {
+  try {
+    const { id: songId } = req.params;
+    const userId = req.user._id.toString();
+
+    await trackSongPlay(songId, userId);
+    res.json({ message: "Play tracked" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Track song completion
+export const trackComplete = async (req, res) => {
+  try {
+    const { id: songId } = req.params;
+    const userId = req.user._id.toString();
+
+    await trackSongComplete(songId, userId);
+    res.json({ message: "Completion tracked" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Track song skip
+export const trackSkip = async (req, res) => {
+  try {
+    const { id: songId } = req.params;
+    const userId = req.user._id.toString();
+
+    await trackSongSkip(songId, userId);
+    res.json({ message: "Skip tracked" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get personalized recommendations
+export const getRecommendations = async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const count = parseInt(req.query.count) || 10;
+
+    const recommendations = await getPersonalizedRecommendations(userId, count);
+    res.json(recommendations);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get similar songs
+export const getSimilar = async (req, res) => {
+  try {
+    const { id: songId } = req.params;
+    const count = parseInt(req.query.count) || 10;
+
+    const similar = await getSimilarSongs(songId, count);
+    res.json(similar);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get trending songs
+export const getTrending = async (req, res) => {
+  try {
+    const count = parseInt(req.query.count) || 20;
+    const trending = await getTrendingSongs(count);
+    res.json(trending);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

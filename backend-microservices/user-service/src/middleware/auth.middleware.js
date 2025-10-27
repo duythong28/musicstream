@@ -1,4 +1,3 @@
-// user-service/src/middleware/auth.middleware.js
 import { getAuth } from "@clerk/express";
 
 export const requireAuth = async (req, res, next) => {
