@@ -307,6 +307,12 @@ backend-microservices/
 ├── api-gateway/
 ├── shared/
 │   └── utils/
+├── k8s/
+│   ├── secrets.yaml
+│   ├── user-service-deployment.yaml
+│   ├── song-service-deployment.yaml
+│   ├── album-service-deployment.yaml
+│   ├── api-gateway-deployment.yaml
 ├── docker-compose.yml
 └── README.md
 ```
