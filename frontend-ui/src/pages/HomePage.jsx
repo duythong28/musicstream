@@ -79,7 +79,7 @@ const HomePage = () => {
       {/* Recent Albums */}
       <section>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold">Popular Albums</h2>
+          <h2 className="text-3xl font-bold">Recent Albums</h2>
           <Link
             to="/albums"
             className="text-gray-400 hover:text-white transition flex items-center space-x-1"

@@ -15,7 +15,7 @@ const SimilarSongs = ({ songId }) => {
 
   const fetchSimilarSongs = async () => {
     try {
-      const songs = await recommendationService.getSimilarSongs(songId, 8);
+      const songs = await recommendationService.getSimilarSongs(songId, 10);
       setSimilarSongs(songs);
     } catch (error) {
       console.error("Error fetching similar songs:", error);
@@ -29,8 +29,8 @@ const SimilarSongs = ({ songId }) => {
       <div className="py-8">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-dark-tertiary rounded w-48"></div>
-          <div className="grid grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-5 gap-4">
+            {[...Array(5)].map((_, i) => (
               <div key={i} className="h-48 bg-dark-tertiary rounded"></div>
             ))}
           </div>
@@ -49,7 +49,7 @@ const SimilarSongs = ({ songId }) => {
         <Music4 className="text-primary" size={24} />
         <h2 className="text-2xl font-bold">You Might Also Like</h2>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-6">
         {similarSongs.map((song) => (
           <SongCard key={song._id} song={song} />
         ))}
