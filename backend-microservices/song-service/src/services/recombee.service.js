@@ -129,6 +129,7 @@ export const getRecommendations = async (userId, count = 10, options = {}) => {
       scenario: options.scenario || "homepage",
       cascadeCreate: true,
       returnProperties: true,
+      logic: "recombee:homepage",
       includedProperties: ["title", "artist", "duration", "albumId"],
       filter: options.filter,
       booster: options.booster,
@@ -167,6 +168,7 @@ export const getSimilarSongs = async (
       count,
       {
         scenario: "similar-songs",
+        logic: "recombee:similar",
         cascadeCreate: true,
         returnProperties: true,
         includedProperties: ["title", "artist", "duration", "albumId"],
@@ -201,11 +203,11 @@ export const getTrendingSongs = async (count = 20) => {
         cascadeCreate: true,
         returnProperties: true,
         includedProperties: ["title", "artist", "duration", "albumId"],
-        // Boost items with more recent interactions
         logic: {
-          name: "weighted-random",
-          parameters: {
-            halfLife: 7 * 24 * 3600, // 7 days
+          name: "recombee:popular",
+          settings: {
+            timePeriod: 7 * 24 * 3600, // 7 days
+            interactionTypes: ["detailViews", "purchases", "ratings"],
           },
         },
         minRelevance: "low",
