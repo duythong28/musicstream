@@ -1,8 +1,8 @@
-# k8s/album-service-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: album-service
+  namespace: music-stream
   labels:
     app: album-service
 spec:
@@ -34,7 +34,7 @@ spec:
               topologyKey: kubernetes.io/hostname
       containers:
       - name: album-service
-        image: your-registry/album-service:latest
+        image: youracr.azurecr.io/album-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3003
@@ -121,7 +121,7 @@ spec:
           failureThreshold: 30
         securityContext:
           runAsNonRoot: true
-          runAsUser: 1000
+          runAsUser: 1001
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: false
           capabilities:
@@ -132,6 +132,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: album-service
+  namespace: music-stream
   labels:
     app: album-service
 spec:
@@ -149,6 +150,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: album-service-hpa
+  namespace: music-stream
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
