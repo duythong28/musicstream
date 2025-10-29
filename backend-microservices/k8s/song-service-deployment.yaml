@@ -1,24 +1,24 @@
-# k8s/album-service-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: album-service
+  name: song-service
+  namespace: music-stream
   labels:
-    app: album-service
+    app: song-service
 spec:
-  replicas: 2
+  replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 2
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: album-service
+      app: song-service
   template:
     metadata:
       labels:
-        app: album-service
+        app: song-service
     spec:
       affinity:
         podAntiAffinity:
@@ -30,26 +30,26 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - album-service
+                  - song-service
               topologyKey: kubernetes.io/hostname
       containers:
-      - name: album-service
-        image: your-registry/album-service:latest
+      - name: song-service
+        image: registry.digitalocean.com/your-registry-name/song-service:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3003
+        - containerPort: 3002
           name: http
           protocol: TCP
         env:
         - name: NODE_ENV
           value: "production"
         - name: PORT
-          value: "3003"
+          value: "3002"
         - name: MONGODB_URI
           valueFrom:
             secretKeyRef:
               name: mongodb-secret
-              key: albums-db-uri
+              key: songs-db-uri
         - name: REDIS_URL
           valueFrom:
             secretKeyRef:
@@ -67,8 +67,8 @@ spec:
               key: publishable-key
         - name: USER_SERVICE_URL
           value: "http://user-service:3001"
-        - name: SONG_SERVICE_URL
-          value: "http://song-service:3002"
+        - name: ALBUM_SERVICE_URL
+          value: "http://album-service:3003"
         - name: CLOUDINARY_CLOUD_NAME
           valueFrom:
             secretKeyRef:
@@ -84,17 +84,32 @@ spec:
             secretKeyRef:
               name: cloudinary-secret
               key: api-secret
+        - name: RECOMBEE_DATABASE_ID
+          valueFrom:
+            secretKeyRef:
+              name: recombee-secret
+              key: database-id
+        - name: RECOMBEE_PRIVATE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: recombee-secret
+              key: private-token
+        - name: RECOMBEE_REGION
+          valueFrom:
+            secretKeyRef:
+              name: recombee-secret
+              key: region
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
             memory: "512Mi"
             cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
         livenessProbe:
           httpGet:
             path: /health
-            port: 3003
+            port: 3002
             scheme: HTTP
           initialDelaySeconds: 30
           periodSeconds: 10
@@ -104,9 +119,9 @@ spec:
         readinessProbe:
           httpGet:
             path: /health
-            port: 3003
+            port: 3002
             scheme: HTTP
-          initialDelaySeconds: 10
+          initialDelaySeconds: 15
           periodSeconds: 5
           timeoutSeconds: 3
           successThreshold: 1
@@ -114,14 +129,14 @@ spec:
         startupProbe:
           httpGet:
             path: /health
-            port: 3003
-          initialDelaySeconds: 5
+            port: 3002
+          initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 30
         securityContext:
           runAsNonRoot: true
-          runAsUser: 1000
+          runAsUser: 1001
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: false
           capabilities:
@@ -131,31 +146,33 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: album-service
+  name: song-service
+  namespace: music-stream
   labels:
-    app: album-service
+    app: song-service
 spec:
   type: ClusterIP
   sessionAffinity: None
   ports:
-  - port: 3003
-    targetPort: 3003
+  - port: 3002
+    targetPort: 3002
     protocol: TCP
     name: http
   selector:
-    app: album-service
+    app: song-service
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: album-service-hpa
+  name: song-service-hpa
+  namespace: music-stream
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: album-service
-  minReplicas: 2
-  maxReplicas: 8
+    name: song-service
+  minReplicas: 3
+  maxReplicas: 15
   metrics:
   - type: Resource
     resource:
@@ -168,7 +185,7 @@ spec:
       name: memory
       target:
         type: Utilization
-        averageUtilization: 80
+        averageUtilization: 75
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -176,9 +193,17 @@ spec:
       - type: Percent
         value: 50
         periodSeconds: 60
+      - type: Pods
+        value: 3
+        periodSeconds: 60
+      selectPolicy: Min
     scaleUp:
       stabilizationWindowSeconds: 60
       policies:
       - type: Percent
         value: 100
         periodSeconds: 30
+      - type: Pods
+        value: 5
+        periodSeconds: 30
+      selectPolicy: Max
