@@ -1,0 +1,55 @@
+import { Link, useLocation } from "react-router-dom";
+import { Home, Music, Disc, Library, Sparkles } from "lucide-react";
+
+const Sidebar = () => {
+  const location = useLocation();
+
+  const menuItems = [
+    { icon: Home, label: "Home", path: "/" },
+    { icon: Sparkles, label: "For You", path: "/for-you" },
+    { icon: Music, label: "Songs", path: "/songs" },
+    { icon: Disc, label: "Albums", path: "/albums" },
+    { icon: Library, label: "My Library", path: "/library" },
+  ];
+
+  return (
+    <div className="w-64 bg-dark-secondary h-full flex flex-col">
+      <div className="flex-1 py-6">
+        <nav className="space-y-2 px-4">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`
+                  flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+                  ${
+                    isActive
+                      ? "bg-dark-tertiary text-primary"
+                      : "text-gray-400 hover:text-white hover:bg-dark-tertiary"
+                  }
+                `}
+              >
+                <Icon size={24} />
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-dark-tertiary">
+        <div className="text-xs text-gray-400">
+          <p>© 2024 MusicStream</p>
+          <p>Cloud-Native Microservices</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Sidebar;
