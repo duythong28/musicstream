@@ -6,7 +6,7 @@ metadata:
   labels:
     app: api-gateway
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -34,7 +34,7 @@ spec:
               topologyKey: kubernetes.io/hostname
       containers:
       - name: api-gateway
-        image: youracr.azurecr.io/api-gateway:latest
+        image: registry.digitalocean.com/music-stream-registry/api-gateway:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -63,11 +63,11 @@ spec:
           value: "http://album-service:3003"
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
+            memory: "128Mi"
+            cpu: "100m"
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "256Mi"
+            cpu: "150m"
         livenessProbe:
           httpGet:
             path: /health
@@ -133,7 +133,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: api-gateway
-  minReplicas: 3
+  minReplicas: 1
   maxReplicas: 10
   metrics:
   - type: Resource
