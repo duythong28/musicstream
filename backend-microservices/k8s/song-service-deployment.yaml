@@ -6,7 +6,7 @@ metadata:
   labels:
     app: song-service
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -34,7 +34,7 @@ spec:
               topologyKey: kubernetes.io/hostname
       containers:
       - name: song-service
-        image: registry.digitalocean.com/your-registry-name/song-service:latest
+        image: registry.digitalocean.com/music-stream-registry/song-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3002
@@ -101,8 +101,8 @@ spec:
               key: region
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "256Mi"
+            cpu: "150m"
           limits:
             memory: "1Gi"
             cpu: "1000m"
@@ -171,7 +171,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: song-service
-  minReplicas: 3
+  minReplicas: 1
   maxReplicas: 15
   metrics:
   - type: Resource
