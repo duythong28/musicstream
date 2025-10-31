@@ -63,10 +63,88 @@ const UserManagement = () => {
     <div>
       <h2 className="text-2xl font-bold mb-6">User Management</h2>
 
-      <div className="bg-dark-secondary rounded-lg overflow-hidden">
+      {/* Mobile Card View */}
+      <div className="block sm:hidden space-y-4">
+        {users.map((user) => (
+          <div key={user._id} className="bg-dark-secondary rounded-lg p-4">
+            <div className="flex items-center space-x-3 mb-3">
+              <img
+                src={user.imageUrl}
+                alt={user.fullName}
+                className="w-12 h-12 rounded-full"
+              />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium truncate">{user.fullName}</h3>
+                <p className="text-sm text-gray-400 truncate">{user.email}</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Role</label>
+                <select
+                  value={user.role}
+                  onChange={(e) => handleChangeRole(user._id, e.target.value)}
+                  className="w-full bg-dark-tertiary text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="user">User</option>
+                  <option value="artist">Artist</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">
+                  Status
+                </label>
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                    user.isBlocked
+                      ? "bg-red-900 text-red-200"
+                      : "bg-green-900 text-green-200"
+                  }`}
+                >
+                  {user.isBlocked ? "Blocked" : "Active"}
+                </span>
+              </div>
+
+              <div className="flex space-x-2 pt-2">
+                <button
+                  onClick={() => handleBlockUser(user._id)}
+                  className="flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-yellow-500 bg-dark-tertiary hover:bg-dark-hover rounded-lg transition text-sm touch-manipulation"
+                  title={user.isBlocked ? "Unblock" : "Block"}
+                >
+                  <Ban size={16} />
+                  <span>{user.isBlocked ? "Unblock" : "Block"}</span>
+                </button>
+                <button
+                  onClick={() => handleDeleteUser(user._id)}
+                  className="flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-red-500 bg-dark-tertiary hover:bg-dark-hover rounded-lg transition text-sm touch-manipulation"
+                  title="Delete"
+                >
+                  <Trash2 size={16} />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden sm:block bg-dark-secondary rounded-lg overflow-hidden overflow-x-auto">
         <table className="w-full">
           <thead className="bg-dark-tertiary">
             <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                User
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                Email
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                Role
+              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">
                 Status
               </th>

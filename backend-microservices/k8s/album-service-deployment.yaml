@@ -6,7 +6,7 @@ metadata:
   labels:
     app: album-service
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -34,7 +34,7 @@ spec:
               topologyKey: kubernetes.io/hostname
       containers:
       - name: album-service
-        image: youracr.azurecr.io/album-service:latest
+        image: registry.digitalocean.com/music-stream-registry/album-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3003
@@ -86,11 +86,11 @@ spec:
               key: api-secret
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
+            memory: "128Mi"
+            cpu: "100m"
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "256Mi"
+            cpu: "150m"
         livenessProbe:
           httpGet:
             path: /health
@@ -156,7 +156,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: album-service
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 8
   metrics:
   - type: Resource

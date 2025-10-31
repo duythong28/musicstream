@@ -400,3 +400,261 @@ button:active::before {
   background-size: 200px 100%;
   animation: skeleton 1.5s infinite;
 }
+
+
+/* Visualizer Page Specific Styles */
+.visualizer-container canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Mobile: Adjust visualizer height */
+@media (max-width: 640px) {
+  .visualizer-container {
+    height: 200px !important;
+  }
+}
+
+/* Hover effects for interactive elements */
+.control-button {
+  transition: all 0.2s ease;
+}
+
+.control-button:hover {
+  transform: scale(1.1);
+}
+
+.control-button:active {
+  transform: scale(0.95);
+}
+
+.play-button {
+  transition: all 0.2s ease;
+}
+
+.play-button:hover {
+  transform: scale(1.05);
+}
+
+.play-button:active {
+  transform: scale(0.95);
+}
+
+/* Album art animation */
+.album-art {
+  transition: all 0.3s ease;
+}
+
+/* Song info text effects */
+.song-info h2,
+.song-info p {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* Mobile: Smaller shadows */
+@media (max-width: 640px) {
+  .song-info h2,
+  .song-info p {
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Loading states */
+.skeleton {
+  animation: skeleton-loading 1s linear infinite alternate;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  100% {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  /* Reduce spacing on mobile */
+  .space-y-12 > * + * {
+    margin-top: 2rem;
+  }
+  
+  /* Optimize font sizes */
+  h1 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  /* Better touch targets */
+  button,
+  a,
+  input[type="range"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Optimize tables for mobile */
+  table {
+    font-size: 0.875rem;
+  }
+  
+  th,
+  td {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 640px) {
+  /* Even more compact spacing */
+  .space-y-12 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  /* Smaller padding */
+  .p-8 {
+    padding: 1rem;
+  }
+  
+  .p-6 {
+    padding: 0.75rem;
+  }
+  
+  /* Grid adjustments */
+  .grid-cols-2 {
+    gap: 0.75rem;
+  }
+  
+  /* Audio player mobile optimizations */
+  .audio-player-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  /* Card improvements */
+  .rounded-lg {
+    border-radius: 0.5rem;
+  }
+  
+  /* Modal improvements */
+  .modal-content {
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+}
+
+/* Landscape mobile devices */
+@media (max-width: 896px) and (orientation: landscape) {
+  .min-h-screen {
+    min-height: 100vh;
+  }
+  
+  /* Compact header in landscape */
+  .visualizer-container {
+    height: 60vh !important;
+  }
+}
+
+/* Prevent layout shift */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Safe area for iOS devices */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+  
+  .fixed,
+  .sticky {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* Improve form elements on mobile */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+/* Better modal experience on mobile */
+@media (max-width: 640px) {
+  .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+  
+  .modal-content {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+/* Optimize image loading */
+img {
+  content-visibility: auto;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #1db954;
+  outline-offset: 2px;
+}
+
+/* Hide scrollbar on mobile for cleaner look */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 0px;
+    display: none;
+  }
+  
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
+
+/* Prevent text selection on interactive elements */
+button,
+.control-button,
+.play-button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Better tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: rgba(29, 185, 84, 0.1);
+}
+
+/* Optimize animations on lower-end devices */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

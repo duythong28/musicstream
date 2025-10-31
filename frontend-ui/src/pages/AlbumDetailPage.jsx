@@ -80,7 +80,7 @@ const AlbumDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen -m-8">
+    <div className="min-h-screen -m-4 sm:-m-6 lg:-m-8">
       {/* Hero Section with Gradient Background */}
       <div
         className="relative"
@@ -96,36 +96,36 @@ const AlbumDetailPage = () => {
           }}
         />
 
-        <div className="relative px-8 pt-6 pb-8">
+        <div className="relative px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
           {/* Back Button */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center space-x-2 text-gray-300 hover:text-white mb-6 transition control-button"
+            className="flex items-center space-x-2 text-gray-300 hover:text-white mb-4 sm:mb-6 transition control-button touch-manipulation"
           >
             <ArrowLeft size={20} />
             <span>Back</span>
           </button>
 
           {/* Album Header */}
-          <div className="flex items-end space-x-6 mb-8">
-            <div className="relative flex-shrink-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6 mb-6 sm:mb-8">
+            <div className="relative flex-shrink-0 w-full sm:w-auto">
               <img
                 src={album.imageUrl}
                 alt={album.title}
-                className="w-48 h-48 sm:w-64 sm:h-64 rounded-lg shadow-2xl"
+                className="w-full sm:w-48 md:w-56 lg:w-64 aspect-square rounded-lg shadow-2xl"
                 style={{
                   boxShadow: `0 25px 50px -12px ${colors.vibrant}60`,
                 }}
               />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 w-full">
               <p className="text-xs sm:text-sm font-semibold uppercase text-gray-300 mb-2">
                 {album.isPublic ? "Album" : "Playlist"}
               </p>
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-4 truncate">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 sm:mb-4 break-words">
                 {album.title}
               </h1>
-              <div className="flex items-center space-x-2 text-sm text-gray-300">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-gray-300">
                 <span className="font-medium hover:underline cursor-pointer">
                   {album.creatorName}
                 </span>
@@ -139,15 +139,19 @@ const AlbumDetailPage = () => {
 
       {/* Content Section */}
       <div
-        className="px-8 py-6"
+        className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6"
         style={{
           background: `linear-gradient(180deg, rgba(18,18,18,0.6) 0%, #121212 20%)`,
         }}
       >
         {/* Play Button */}
         {album.songs && album.songs.length > 0 && (
-          <div className="mb-6">
-            <Button onClick={handlePlayAll} size="lg">
+          <div className="mb-4 sm:mb-6">
+            <Button
+              onClick={handlePlayAll}
+              size="lg"
+              className="w-full sm:w-auto"
+            >
               <Play size={20} className="mr-2" />
               Play All
             </Button>
@@ -156,72 +160,102 @@ const AlbumDetailPage = () => {
 
         {/* Songs Table */}
         <div className="bg-transparent">
-          <div className="px-4 py-2 border-b border-white/10">
+          <div className="hidden sm:block px-4 py-2 border-b border-white/10">
             <div className="grid grid-cols-12 gap-4 text-xs text-gray-400 uppercase tracking-wider">
               <div className="col-span-1">#</div>
-              <div className="col-span-5 sm:col-span-6">Title</div>
-              <div className="hidden sm:block col-span-3">Artist</div>
-              <div className="col-span-2 sm:col-span-1 text-right">
+              <div className="col-span-6">Title</div>
+              <div className="col-span-3">Artist</div>
+              <div className="col-span-1 text-right">
                 <Clock size={16} className="inline" />
               </div>
-              {isOwner && (
-                <div className="col-span-4 sm:col-span-1 text-right">
-                  Actions
-                </div>
-              )}
+              {isOwner && <div className="col-span-1 text-right">Actions</div>}
             </div>
           </div>
 
           <div>
             {album.songs && album.songs.length > 0 ? (
-              album.songs.map((song, index) => {
-                return (
-                  <div
-                    key={song._id}
-                    className={`group px-4 py-3 rounded-md hover:bg-white/10 cursor-pointer transition `}
-                    onClick={() => setQueue(album.songs, index)}
-                  >
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                      <div className="col-span-1 text-gray-400">
-                        <span className={"group-hover:hidden"}>
-                          {index + 1}
+              album.songs.map((song, index) => (
+                <div
+                  key={song._id}
+                  className="group px-2 sm:px-4 py-3 rounded-md hover:bg-white/10 cursor-pointer transition"
+                  onClick={() => setQueue(album.songs, index)}
+                >
+                  <div className="grid grid-cols-12 gap-2 sm:gap-4 items-center">
+                    {/* Mobile Layout */}
+                    <div className="col-span-12 sm:hidden flex items-center space-x-3">
+                      <span className="text-gray-400 w-6 flex-shrink-0">
+                        <span className="group-hover:hidden">{index + 1}</span>
+                        <Play
+                          size={16}
+                          className="text-primary hidden group-hover:block"
+                        />
+                      </span>
+                      <img
+                        src={song.imageUrl}
+                        alt={song.title}
+                        className="w-12 h-12 rounded flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{song.title}</p>
+                        <p className="text-sm text-gray-400 truncate">
+                          {song.artistName}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2 flex-shrink-0">
+                        <span className="text-sm text-gray-400">
+                          {formatTime(song.duration)}
                         </span>
+                        {isOwner && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveSong(song._id);
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-500 transition touch-manipulation"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Desktop Layout */}
+                    <div className="hidden sm:contents">
+                      <div className="col-span-1 text-gray-400">
+                        <span className="group-hover:hidden">{index + 1}</span>
                         <Play
                           size={16}
                           className="text-primary hidden group-hover:block"
                         />
                       </div>
 
-                      <div className="col-span-5 sm:col-span-6 flex items-center space-x-3 min-w-0">
+                      <div className="col-span-6 flex items-center space-x-3 min-w-0">
                         <img
                           src={song.imageUrl}
                           alt={song.title}
                           className="w-10 h-10 rounded flex-shrink-0"
                         />
-                        <div className="min-w-0">
-                          <span className="font-medium">{song.title}</span>
-                          <p className="text-sm text-gray-400 truncate sm:hidden">
-                            {song.artistName}
-                          </p>
-                        </div>
+                        <span className="font-medium truncate">
+                          {song.title}
+                        </span>
                       </div>
 
-                      <div className="hidden sm:block col-span-3 text-gray-400 truncate">
+                      <div className="col-span-3 text-gray-400 truncate">
                         {song.artistName}
                       </div>
 
-                      <div className="col-span-2 sm:col-span-1 text-right text-gray-400 text-sm">
+                      <div className="col-span-1 text-right text-gray-400 text-sm">
                         {formatTime(song.duration)}
                       </div>
 
                       {isOwner && (
-                        <div className="col-span-4 sm:col-span-1 text-right">
+                        <div className="col-span-1 text-right">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemoveSong(song._id);
                             }}
-                            className="p-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
+                            className="p-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition touch-manipulation"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -229,8 +263,8 @@ const AlbumDetailPage = () => {
                       )}
                     </div>
                   </div>
-                );
-              })
+                </div>
+              ))
             ) : (
               <div className="py-16 text-center text-gray-400">
                 <p className="text-lg mb-2">
