@@ -13,7 +13,7 @@ import {
   useAuth,
 } from "@clerk/clerk-react";
 import { Toaster } from "react-hot-toast";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "./store/useAuthStore";
 import { AudioContextProvider } from "./contexts/AudioContext";
 
@@ -96,12 +96,36 @@ const AuthSync = ({ children }) => {
 };
 
 const MainLayout = ({ children }) => {
+  const [showSidebar, setShowSidebar] = useState(false);
+
   return (
     <div className="h-screen flex flex-col bg-dark">
-      <Navbar />
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto p-8 pb-32">{children}</main>
+      <Navbar onMenuClick={() => setShowSidebar(!showSidebar)} />
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Mobile Sidebar Overlay */}
+        {showSidebar && (
+          <div
+            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+            onClick={() => setShowSidebar(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <div
+          className={`
+          fixed lg:static inset-y-0 left-0 z-30 transform transition-transform duration-300 ease-in-out
+          ${
+            showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }
+        `}
+        >
+          <Sidebar onClose={() => setShowSidebar(false)} />
+        </div>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-32 lg:pb-40">
+          {children}
+        </main>
       </div>
     </div>
   );
@@ -112,7 +136,7 @@ const GlobalAudioPlayer = () => {
   const isVisualizerPage = location.pathname === "/visualizer";
 
   return (
-    <div className={isVisualizerPage ? "hidden" : ""}>
+    <div className={isVisualizerPage ? "hidden" : "lg:z-50 lg:absolute"}>
       <AudioPlayer />
     </div>
   );

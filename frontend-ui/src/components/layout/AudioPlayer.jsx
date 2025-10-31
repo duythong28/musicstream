@@ -11,7 +11,7 @@ import {
   Repeat,
   Shuffle,
   ListMusic,
-  Maximize2,
+  MoreHorizontal,
 } from "lucide-react";
 import { formatTime } from "../../utils/formatTime";
 import QueueModal from "../player/QueueModal";
@@ -26,6 +26,7 @@ const AudioPlayer = () => {
   const preloadAudioRef = useRef(null);
   const navigate = useNavigate();
   const [showQueue, setShowQueue] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [visualizerType, setVisualizerType] = useState("bars");
   const [showVisualizer, setShowVisualizer] = useState(true);
   const [isLoadingQuality, setIsLoadingQuality] = useState(false);
@@ -218,6 +219,11 @@ const AudioPlayer = () => {
         ref={audioRef}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
+        onLoadedMetadata={(e) => {
+          if (audioRef.current) {
+            usePlayerStore.setState({ duration: e.target.duration });
+          }
+        }}
         crossOrigin="anonymous"
       />
 
@@ -230,10 +236,10 @@ const AudioPlayer = () => {
         <AudioVisualizer type={visualizerType} />
       </div>
 
-      <div className="px-4 py-3">
+      <div className="px-3 sm:px-4 py-2 sm:py-3">
         {/* Progress Bar */}
         <div className="flex items-center space-x-2 mb-2">
-          <span className="text-xs text-gray-400 w-12 text-right">
+          <span className="text-[10px] sm:text-xs text-gray-400 w-10 sm:w-12 text-right">
             {formatTime(currentTime)}
           </span>
           <input
@@ -247,12 +253,13 @@ const AudioPlayer = () => {
               "--progress": `${duration ? (currentTime / duration) * 100 : 0}%`,
             }}
           />
-          <span className="text-xs text-gray-400 w-12">
+          <span className="text-[10px] sm:text-xs text-gray-400 w-10 sm:w-12">
             {formatTime(duration)}
           </span>
         </div>
 
-        <div className="flex items-center justify-between">
+        {/* Desktop Layout */}
+        <div className="hidden lg:flex items-center justify-between">
           {/* Song Info */}
           <div className="flex items-center space-x-4 flex-1">
             <img
@@ -274,7 +281,7 @@ const AudioPlayer = () => {
             </div>
           </div>
 
-          {/* Controls */}
+          {/* Controls - Center */}
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleShuffle}
@@ -366,6 +373,212 @@ const AudioPlayer = () => {
               />
             </div>
           </div>
+        </div>
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden">
+          <div className="flex items-center justify-center gap-2 relative">
+            {/* Album Art - Left */}
+            <img
+              src={currentSong.imageUrl}
+              alt={currentSong.title}
+              className="absolute left-0 w-12 h-12 rounded-lg cursor-pointer hover:opacity-80 transition"
+              onClick={() => navigate("/visualizer")}
+              title={`${currentSong.title} - ${currentSong.artistName}`}
+            />
+
+            {/* Main Controls - Center */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <button
+                onClick={handlePrevious}
+                className="text-gray-400 hover:text-white transition p-2"
+              >
+                <SkipBack size={22} />
+              </button>
+
+              <button
+                onClick={togglePlay}
+                className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center bg-white rounded-full hover:scale-105 transition"
+              >
+                {isPlaying ? (
+                  <Pause size={22} className="text-black" />
+                ) : (
+                  <Play size={22} className="text-black ml-0.5" />
+                )}
+              </button>
+
+              <button
+                onClick={handleNext}
+                className="text-gray-400 hover:text-white transition p-2"
+              >
+                <SkipForward size={22} />
+              </button>
+            </div>
+
+            {/* More Options - Right */}
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="absolute right-0 text-gray-400 hover:text-white transition p-2"
+            >
+              <MoreHorizontal size={22} />
+            </button>
+          </div>
+
+          {/* Mobile Expanded Controls */}
+          {showMobileMenu && (
+            <div className="mt-3 pt-3 border-t border-dark-tertiary space-y-3">
+              {/* Playback Options */}
+              <div className="flex items-center justify-around">
+                <button
+                  onClick={toggleShuffle}
+                  className={`flex flex-col items-center space-y-1 ${
+                    shuffle ? "text-primary" : "text-gray-400"
+                  } hover:text-white transition p-2`}
+                >
+                  <Shuffle size={20} />
+                  <span className="text-[10px]">Shuffle</span>
+                </button>
+
+                <button
+                  onClick={toggleRepeat}
+                  className={`flex flex-col items-center space-y-1 ${
+                    repeat ? "text-primary" : "text-gray-400"
+                  } hover:text-white transition p-2`}
+                >
+                  <Repeat size={20} />
+                  <span className="text-[10px]">Repeat</span>
+                </button>
+
+                <button
+                  onClick={() => setShowQueue(true)}
+                  className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white transition p-2"
+                >
+                  <ListMusic size={20} />
+                  <span className="text-[10px]">Queue</span>
+                </button>
+
+                <button
+                  onClick={() => setShowVisualizer(!showVisualizer)}
+                  className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white transition p-2"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M3 3h2v14H3V3zm4 4h2v10H7V7zm4-2h2v12h-2V5zm4 4h2v8h-2V9z" />
+                  </svg>
+                  <span className="text-[10px]">Visualizer</span>
+                </button>
+              </div>
+
+              {/* Volume Control */}
+              <div className="flex items-center space-x-3 bg-dark-tertiary rounded-lg p-3">
+                <button
+                  onClick={() => setVolume(volume === 0 ? 0.5 : 0)}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  {volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={volume}
+                  onChange={(e) => setVolume(parseFloat(e.target.value))}
+                  className="flex-1 volume-slider"
+                  style={{
+                    "--volume": `${volume * 100}%`,
+                  }}
+                />
+                <span className="text-xs text-gray-400 w-10 text-right">
+                  {Math.round(volume * 100)}%
+                </span>
+              </div>
+
+              {/* Quality Selector - Mobile Version */}
+              {hasStreamingUrls && (
+                <div className="bg-dark-tertiary rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-300">
+                      Audio Quality
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {getQualityLabel()}
+                    </span>
+                  </div>
+
+                  {/* Auto Quality Toggle */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs text-gray-400">Auto Quality</span>
+                    <button
+                      onClick={toggleAutoQuality}
+                      className={`relative w-11 h-6 rounded-full transition ${
+                        autoQuality ? "bg-primary" : "bg-gray-600"
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transform transition ${
+                          autoQuality ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Quality Buttons */}
+                  {!autoQuality && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => changeQuality("low")}
+                        className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition ${
+                          quality === "low"
+                            ? "bg-primary text-black"
+                            : "bg-dark-secondary text-gray-300 hover:bg-dark-hover"
+                        }`}
+                      >
+                        Low
+                      </button>
+                      <button
+                        onClick={() => changeQuality("medium")}
+                        className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition ${
+                          quality === "medium"
+                            ? "bg-primary text-black"
+                            : "bg-dark-secondary text-gray-300 hover:bg-dark-hover"
+                        }`}
+                      >
+                        Medium
+                      </button>
+                      <button
+                        onClick={() => changeQuality("high")}
+                        className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition ${
+                          quality === "high"
+                            ? "bg-primary text-black"
+                            : "bg-dark-secondary text-gray-300 hover:bg-dark-hover"
+                        }`}
+                      >
+                        High
+                      </button>
+                    </div>
+                  )}
+
+                  {autoQuality && (
+                    <div className="text-xs text-gray-400 text-center">
+                      Network: {getNetworkLabel()}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Close Button */}
+              <button
+                onClick={() => setShowMobileMenu(false)}
+                className="w-full py-2 text-sm text-gray-400 hover:text-white transition"
+              >
+                Close
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
