@@ -39,14 +39,14 @@ const ForYouPage = () => {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <Sparkles className="text-primary" size={32} />
-          <h1 className="text-4xl font-bold">For You</h1>
+      <div className="mb-6 sm:mb-8">
+        <div className="flex items-center space-x-2 sm:space-x-3 mb-2">
+          <Sparkles className="text-primary" size={28} />
+          <h1 className="text-3xl sm:text-4xl font-bold">For You</h1>
         </div>
-        <p className="text-gray-400">
+        <p className="text-sm sm:text-base text-gray-400">
           Personalized recommendations based on your listening history
         </p>
       </div>
@@ -54,9 +54,11 @@ const ForYouPage = () => {
       {/* Recommended Songs */}
       {recommendations.length > 0 && (
         <section>
-          <div className="flex items-center space-x-2 mb-6">
-            <Music className="text-primary" size={24} />
-            <h2 className="text-2xl font-bold">Recommended for You</h2>
+          <div className="flex items-center space-x-2 mb-4 sm:mb-6">
+            <Music className="text-primary" size={20} />
+            <h2 className="text-xl sm:text-2xl font-bold">
+              Recommended for You
+            </h2>
           </div>
           <SongList songs={recommendations} />
         </section>
@@ -65,9 +67,9 @@ const ForYouPage = () => {
       {/* Trending */}
       {trending.length > 0 && (
         <section>
-          <div className="flex items-center space-x-2 mb-6">
-            <TrendingUp className="text-primary" size={24} />
-            <h2 className="text-2xl font-bold">Trending Now</h2>
+          <div className="flex items-center space-x-2 mb-4 sm:mb-6">
+            <TrendingUp className="text-primary" size={20} />
+            <h2 className="text-xl sm:text-2xl font-bold">Trending Now</h2>
           </div>
           <SongList songs={trending} />
         </section>
@@ -75,10 +77,12 @@ const ForYouPage = () => {
 
       {/* Empty State */}
       {recommendations.length === 0 && trending.length === 0 && (
-        <div className="text-center py-12">
-          <Sparkles className="text-gray-600 mx-auto mb-4" size={64} />
-          <h3 className="text-xl font-semibold mb-2">No Recommendations Yet</h3>
-          <p className="text-gray-400 max-w-md mx-auto">
+        <div className="text-center py-12 px-4">
+          <Sparkles className="text-gray-600 mx-auto mb-4" size={48} />
+          <h3 className="text-lg sm:text-xl font-semibold mb-2">
+            No Recommendations Yet
+          </h3>
+          <p className="text-sm sm:text-base text-gray-400 max-w-md mx-auto">
             Start listening to songs to get personalized recommendations based
             on your taste!
           </p>
