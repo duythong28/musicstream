@@ -22,9 +22,9 @@ const SongsPage = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">All Songs</h1>
-        <p className="text-gray-400">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2">All Songs</h1>
+        <p className="text-sm sm:text-base text-gray-400">
           {songs.length} song{songs.length !== 1 ? "s" : ""} available
         </p>
       </div>
