@@ -95,7 +95,7 @@ const Navbar = ({ onMenuClick }) => {
           )}
 
           {clerkUser ? (
-            <UserButton afterSignOutUrl="/" />
+            <UserButton afterSignOutUrl="/sign-in" />
           ) : (
             <Link
               to="/sign-in"

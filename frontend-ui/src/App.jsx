@@ -158,77 +158,57 @@ function App() {
               }}
             />
 
-            <Routes>
-              <Route path="/sign-in/*" element={<SignInPage />} />
-              <Route path="/sign-up/*" element={<SignUpPage />} />
+            <SignedOut>
+              <Routes>
+                <Route path="/sign-in/*" element={<SignInPage />} />
+                <Route path="/sign-up/*" element={<SignUpPage />} />
+                <Route path="*" element={<Navigate to="/sign-in" replace />} />
+              </Routes>
+            </SignedOut>
 
-              <Route
-                path="/*"
-                element={
-                  <SignedIn>
-                    <Routes>
-                      <Route path="/visualizer" element={<VisualizerPage />} />
-                      <Route
-                        path="/*"
-                        element={
-                          <MainLayout>
-                            <Routes>
-                              <Route path="/" element={<HomePage />} />
-                              <Route path="/for-you" element={<ForYouPage />} />
-                              <Route path="/songs" element={<SongsPage />} />
-                              <Route
-                                path="/songs/:id"
-                                element={<SongDetailPage />}
-                              />
-                              <Route path="/albums" element={<AlbumsPage />} />
-                              <Route
-                                path="/albums/:id"
-                                element={<AlbumDetailPage />}
-                              />
-                              <Route
-                                path="/library"
-                                element={<MyLibraryPage />}
-                              />
-                              <Route path="/search" element={<SearchPage />} />
-                              <Route
-                                path="/profile"
-                                element={<ProfilePage />}
-                              />
-                              <Route
-                                path="/artist"
-                                element={
-                                  <ProtectedRoute requireRole="artist">
-                                    <ArtistDashboard />
-                                  </ProtectedRoute>
-                                }
-                              />
-                              <Route
-                                path="/admin"
-                                element={
-                                  <ProtectedRoute requireRole="admin">
-                                    <AdminDashboard />
-                                  </ProtectedRoute>
-                                }
-                              />
-                            </Routes>
-                          </MainLayout>
-                        }
-                      />
-                    </Routes>
-                    <GlobalAudioPlayer />
-                  </SignedIn>
-                }
-              />
-
-              <Route
-                path="/*"
-                element={
-                  <SignedOut>
-                    <Navigate to="/sign-in" replace />
-                  </SignedOut>
-                }
-              />
-            </Routes>
+            <SignedIn>
+              <Routes>
+                <Route path="/visualizer" element={<VisualizerPage />} />
+                <Route
+                  path="/*"
+                  element={
+                    <MainLayout>
+                      <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/for-you" element={<ForYouPage />} />
+                        <Route path="/songs" element={<SongsPage />} />
+                        <Route path="/songs/:id" element={<SongDetailPage />} />
+                        <Route path="/albums" element={<AlbumsPage />} />
+                        <Route
+                          path="/albums/:id"
+                          element={<AlbumDetailPage />}
+                        />
+                        <Route path="/library" element={<MyLibraryPage />} />
+                        <Route path="/search" element={<SearchPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route
+                          path="/artist"
+                          element={
+                            <ProtectedRoute requireRole="artist">
+                              <ArtistDashboard />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin"
+                          element={
+                            <ProtectedRoute requireRole="admin">
+                              <AdminDashboard />
+                            </ProtectedRoute>
+                          }
+                        />
+                      </Routes>
+                    </MainLayout>
+                  }
+                />
+              </Routes>
+              <GlobalAudioPlayer />
+            </SignedIn>
           </AuthSync>
         </BrowserRouter>
       </AudioContextProvider>
