@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 const EditSongModal = ({ isOpen, onClose, song, onSuccess }) => {
   const [formData, setFormData] = useState({
     title: "",
-    duration: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -49,20 +48,16 @@ const EditSongModal = ({ isOpen, onClose, song, onSuccess }) => {
           required
         />
 
-        <Input
-          label="Duration (seconds)"
-          type="number"
-          value={formData.duration}
-          onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-          placeholder="Enter duration in seconds"
-          required
-        />
-
         <div className="flex space-x-4 pt-4">
           <Button type="submit" disabled={isLoading} className="flex-1">
             {isLoading ? "Updating..." : "Update Song"}
           </Button>
-          <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            className="flex-1"
+          >
             Cancel
           </Button>
         </div>
