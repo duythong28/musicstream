@@ -9,7 +9,6 @@ import toast from "react-hot-toast";
 const UploadSongModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     title: "",
-    duration: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
@@ -17,7 +16,7 @@ const UploadSongModal = ({ isOpen, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!imageFile || !audioFile) {
       toast.error("Please select both image and audio files");
       return;
@@ -26,7 +25,6 @@ const UploadSongModal = ({ isOpen, onClose, onSuccess }) => {
     setIsLoading(true);
     const data = new FormData();
     data.append("title", formData.title);
-    data.append("duration", formData.duration);
     data.append("image", imageFile);
     data.append("audio", audioFile);
 
@@ -54,15 +52,6 @@ const UploadSongModal = ({ isOpen, onClose, onSuccess }) => {
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           placeholder="Enter song title"
-          required
-        />
-
-        <Input
-          label="Duration (seconds)"
-          type="number"
-          value={formData.duration}
-          onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-          placeholder="Enter duration in seconds"
           required
         />
 
@@ -108,7 +97,12 @@ const UploadSongModal = ({ isOpen, onClose, onSuccess }) => {
           <Button type="submit" disabled={isLoading} className="flex-1">
             {isLoading ? "Uploading..." : "Upload Song"}
           </Button>
-          <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            className="flex-1"
+          >
             Cancel
           </Button>
         </div>
