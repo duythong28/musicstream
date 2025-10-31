@@ -4,6 +4,7 @@ import { songService } from "../services/songService";
 import { albumService } from "../services/albumService";
 import SongList from "../components/songs/SongList";
 import AlbumList from "../components/albums/AlbumList";
+import { Search } from "lucide-react";
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
