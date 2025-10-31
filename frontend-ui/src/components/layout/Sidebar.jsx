@@ -1,5 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Music, Disc, Library, Sparkles, X } from "lucide-react";
+import {
+  Home,
+  Music,
+  Disc,
+  Library,
+  Sparkles,
+  X,
+  Settings,
+} from "lucide-react";
 
 const Sidebar = ({ onClose }) => {
   const location = useLocation();
@@ -10,6 +18,7 @@ const Sidebar = ({ onClose }) => {
     { icon: Music, label: "Songs", path: "/songs" },
     { icon: Disc, label: "Albums", path: "/albums" },
     { icon: Library, label: "My Library", path: "/library" },
+    { icon: Settings, label: "Profile", path: "/profile" },
   ];
 
   const handleLinkClick = () => {

@@ -4,10 +4,12 @@ import EditProfileModal from "../components/user/EditProfileModal";
 import Button from "../components/common/Button";
 import { Edit, Music, Disc } from "lucide-react";
 import { formatDate } from "../utils/formatTime";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
   const { user } = useAuthStore();
   const [showEditModal, setShowEditModal] = useState(false);
+  const navigate = useNavigate();
 
   if (!user) {
     return (
@@ -141,7 +143,7 @@ const ProfilePage = () => {
             Access your artist dashboard to manage your songs and albums
           </p>
           <Button
-            onClick={() => (window.location.href = "/artist")}
+            onClick={() => navigate("/artist")}
             className="w-full sm:w-auto"
           >
             Go to Artist Dashboard
@@ -158,7 +160,7 @@ const ProfilePage = () => {
             Access the admin dashboard to manage users, songs, and albums
           </p>
           <Button
-            onClick={() => (window.location.href = "/admin")}
+            onClick={() => navigate("/admin")}
             variant="danger"
             className="w-full sm:w-auto"
           >
