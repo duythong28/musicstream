@@ -479,31 +479,23 @@ button:active::before {
   .space-y-12 > * + * {
     margin-top: 2rem;
   }
-  
+
   /* Optimize font sizes */
   h1 {
     font-size: 1.875rem;
     line-height: 2.25rem;
   }
-  
+
   h2 {
     font-size: 1.5rem;
     line-height: 2rem;
   }
-  
-  /* Better touch targets */
-  button,
-  a,
-  input[type="range"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
+
   /* Optimize tables for mobile */
   table {
     font-size: 0.875rem;
   }
-  
+
   th,
   td {
     padding: 0.5rem 0.75rem;
@@ -516,31 +508,31 @@ button:active::before {
   .space-y-12 > * + * {
     margin-top: 1.5rem;
   }
-  
+
   /* Smaller padding */
   .p-8 {
     padding: 1rem;
   }
-  
+
   .p-6 {
     padding: 0.75rem;
   }
-  
+
   /* Grid adjustments */
   .grid-cols-2 {
     gap: 0.75rem;
   }
-  
+
   /* Audio player mobile optimizations */
   .audio-player-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
-  
+
   /* Card improvements */
   .rounded-lg {
     border-radius: 0.5rem;
   }
-  
+
   /* Modal improvements */
   .modal-content {
     max-height: 85vh;
@@ -553,7 +545,7 @@ button:active::before {
   .min-h-screen {
     min-height: 100vh;
   }
-  
+
   /* Compact header in landscape */
   .visualizer-container {
     height: 60vh !important;
@@ -572,7 +564,7 @@ img {
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
   }
-  
+
   .fixed,
   .sticky {
     padding-left: max(0px, env(safe-area-inset-left));
@@ -597,7 +589,7 @@ img {
   .modal-backdrop {
     background-color: rgba(0, 0, 0, 0.9);
   }
-  
+
   .modal-content {
     margin: 1rem;
     max-width: calc(100vw - 2rem);
@@ -626,7 +618,7 @@ html {
     width: 0px;
     display: none;
   }
-  
+
   * {
     scrollbar-width: none;
     -ms-overflow-style: none;
