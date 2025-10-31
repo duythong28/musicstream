@@ -43,21 +43,24 @@ const MyLibraryPage = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2">My Library</h1>
-          <p className="text-gray-400">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2">My Library</h1>
+          <p className="text-sm sm:text-base text-gray-400">
             {albums.length} playlist{albums.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)}>
+        <Button
+          onClick={() => setShowCreateModal(true)}
+          className="w-full sm:w-auto"
+        >
           <Plus size={20} className="mr-2" />
           Create Playlist
         </Button>
       </div>
 
-      <AlbumList 
-        albums={albums} 
+      <AlbumList
+        albums={albums}
         emptyMessage="You haven't created any playlists yet. Create one to start adding your favorite songs!"
       />
 
