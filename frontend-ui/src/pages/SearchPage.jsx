@@ -8,7 +8,7 @@ import AlbumList from "../components/albums/AlbumList";
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  
+
   const [songs, setSongs] = useState([]);
   const [albums, setAlbums] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,7 +66,9 @@ const SearchPage = () => {
   if (!query) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-400 text-lg">Enter a search query to find songs and albums</p>
+        <p className="text-gray-400 text-lg">
+          Enter a search query to find songs and albums
+        </p>
       </div>
     );
   }
@@ -74,30 +76,52 @@ const SearchPage = () => {
   const hasResults = songs.length > 0 || albums.length > 0;
 
   return (
-    <div className="space-y-12">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Search Results</h1>
-        <p className="text-gray-400">Showing results for "{query}"</p>
+    <div className="space-y-8 sm:space-y-12">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2">Search Results</h1>
+        <p className="text-sm sm:text-base text-gray-400 break-words">
+          Showing results for "<span className="text-white">{query}</span>"
+        </p>
       </div>
 
       {hasResults ? (
         <>
           {songs.length > 0 && (
             <section>
-              <SongList songs={songs} title={`Songs (${songs.length})`} />
+              <SongList
+                songs={songs}
+                title={
+                  <span className="text-xl sm:text-2xl">
+                    Songs ({songs.length})
+                  </span>
+                }
+              />
             </section>
           )}
 
           {albums.length > 0 && (
             <section>
-              <AlbumList albums={albums} title={`Albums (${albums.length})`} />
+              <AlbumList
+                albums={albums}
+                title={
+                  <span className="text-xl sm:text-2xl">
+                    Albums ({albums.length})
+                  </span>
+                }
+              />
             </section>
           )}
         </>
       ) : (
-        <div className="text-center py-12">
-          <p className="text-gray-400 text-lg">No results found for "{query}"</p>
-          <p className="text-sm text-gray-500 mt-2">Try different keywords</p>
+        <div className="text-center py-12 px-4">
+          <Search className="text-gray-600 mx-auto mb-4" size={48} />
+          <p className="text-base sm:text-lg text-gray-400 mb-2">
+            No results found for "
+            <span className="text-white break-words">{query}</span>"
+          </p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-2">
+            Try different keywords
+          </p>
         </div>
       )}
     </div>

@@ -21,7 +21,7 @@ const HomePage = () => {
         songService.getAllSongs(),
         albumService.getAllAlbums(),
       ]);
-      
+
       setRecentSongs(songs.slice(0, 10));
       setRecentAlbums(albums.slice(0, 10));
     } catch (error) {
@@ -43,18 +43,18 @@ const HomePage = () => {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary/20 to-transparent rounded-lg p-12">
-        <h1 className="text-5xl font-bold mb-4">
+      <section className="bg-gradient-to-r from-primary/20 to-transparent rounded-lg p-6 sm:p-8 md:p-12">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
           Welcome to MusicStream
         </h1>
-        <p className="text-xl text-gray-300 mb-6">
+        <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-4 sm:mb-6">
           Discover millions of songs and podcasts
         </p>
         <Link
           to="/songs"
-          className="inline-flex items-center space-x-2 bg-primary text-white px-8 py-3 rounded-full hover:bg-green-500 transition font-semibold"
+          className="inline-flex items-center space-x-2 bg-primary text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full hover:bg-green-500 transition font-semibold text-sm sm:text-base touch-manipulation"
         >
           <span>Browse Songs</span>
           <ArrowRight size={20} />
@@ -63,11 +63,11 @@ const HomePage = () => {
 
       {/* Recent Songs */}
       <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold">Recent Songs</h2>
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold">Recent Songs</h2>
           <Link
             to="/songs"
-            className="text-gray-400 hover:text-white transition flex items-center space-x-1"
+            className="text-gray-400 hover:text-white transition flex items-center space-x-1 text-sm sm:text-base touch-manipulation"
           >
             <span>See all</span>
             <ArrowRight size={16} />
@@ -78,11 +78,11 @@ const HomePage = () => {
 
       {/* Recent Albums */}
       <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold">Recent Albums</h2>
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold">Recent Albums</h2>
           <Link
             to="/albums"
-            className="text-gray-400 hover:text-white transition flex items-center space-x-1"
+            className="text-gray-400 hover:text-white transition flex items-center space-x-1 text-sm sm:text-base touch-manipulation"
           >
             <span>See all</span>
             <ArrowRight size={16} />

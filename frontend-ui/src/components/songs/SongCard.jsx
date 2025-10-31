@@ -24,9 +24,9 @@ const SongCard = ({ song, showArtist = true }) => {
     <>
       <Link
         to={`/songs/${song._id}`}
-        className="group bg-dark-tertiary rounded-lg p-4 hover:bg-dark-hover transition-colors cursor-pointer relative"
+        className="group bg-dark-tertiary rounded-lg p-3 sm:p-4 hover:bg-dark-hover transition-colors cursor-pointer relative"
       >
-        <div className="relative mb-4">
+        <div className="relative mb-3 sm:mb-4">
           <img
             src={song.imageUrl}
             alt={song.title}
@@ -38,12 +38,12 @@ const SongCard = ({ song, showArtist = true }) => {
               e.preventDefault();
               handlePlay();
             }}
-            className="absolute bottom-2 right-2 w-12 h-12 bg-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all shadow-lg"
+            className="absolute bottom-2 right-2 w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all shadow-lg touch-manipulation"
           >
             {isCurrentSong && isPlaying ? (
-              <Pause className="text-black" size={24} />
+              <Pause className="text-black" size={20} />
             ) : (
-              <Play className="text-black ml-1" size={24} />
+              <Play className="text-black ml-0.5" size={20} />
             )}
           </button>
         </div>
@@ -56,13 +56,13 @@ const SongCard = ({ song, showArtist = true }) => {
               e.preventDefault();
               setShowMenu(!showMenu);
             }}
-            className="p-2 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-black/70"
+            className="p-2 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-black/70 touch-manipulation"
           >
-            <MoreVertical size={18} />
+            <MoreVertical size={16} />
           </button>
 
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-dark-secondary rounded-lg shadow-xl border border-dark-tertiary z-10">
+            <div className="absolute right-0 mt-2 w-44 sm:w-48 bg-dark-secondary rounded-lg shadow-xl border border-dark-tertiary z-10">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -70,18 +70,22 @@ const SongCard = ({ song, showArtist = true }) => {
                   setShowAddToPlaylist(true);
                   setShowMenu(false);
                 }}
-                className="w-full px-4 py-2 text-left hover:bg-dark-tertiary transition flex items-center space-x-2"
+                className="w-full px-3 sm:px-4 py-2 text-left text-sm hover:bg-dark-tertiary transition flex items-center space-x-2"
               >
-                <ListPlus size={18} />
+                <ListPlus size={16} />
                 <span>Add to playlist</span>
               </button>
             </div>
           )}
         </div>
 
-        <h3 className="font-semibold truncate mb-1">{song.title}</h3>
+        <h3 className="font-semibold truncate mb-1 text-sm sm:text-base">
+          {song.title}
+        </h3>
         {showArtist && (
-          <p className="text-sm text-gray-400 truncate">{song.artistName}</p>
+          <p className="text-xs sm:text-sm text-gray-400 truncate">
+            {song.artistName}
+          </p>
         )}
         <p className="text-xs text-gray-500 mt-1">
           {formatTime(song.duration)}
