@@ -66,6 +66,28 @@ const AudioPlayer = () => {
     hasStreamingUrls,
   } = useAdaptiveStreaming(currentSong);
 
+  // Keyboard shortcut: Space for Play/Pause
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Ignore if user is typing in an input/textarea
+      if (
+        e.target.tagName === "INPUT" ||
+        e.target.tagName === "TEXTAREA" ||
+        e.target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.code === "Space") {
+        e.preventDefault(); // Prevent page scroll
+        togglePlay();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [togglePlay]);
+
   // Handle play/pause
   useEffect(() => {
     if (audioRef.current && audioUrl && !isLoadingQuality) {
